@@ -1,0 +1,8 @@
+# Ignore personal document files
+*.jpg
+*.jpeg
+*.png
+*.pdf
+*.webp
+!preview.png
+IMAGE_TO_PDF/
