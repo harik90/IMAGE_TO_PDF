@@ -1,21 +1,26 @@
-# image to pdf
+# shapedinto
 
-a quiet, client-side web utility to compile images into clean pdf documents.
+a 100% client-side, zero-telemetry multi-tool web utility for images and pdfs.
 
 ## why
 
-most online image-to-pdf converters upload personal scans and photos to unknown third-party servers with upload limits and watermark spam. this tool runs completely inside your browser using canvas and jspdf, ensuring zero network transmission and instantaneous page layout control.
+conventional online file converters upload personal scans, invoices, and sensitive documents to third-party servers. shapedinto runs entirely in memory inside your browser using wasm and canvas, ensuring absolute privacy and instantaneous throughput.
 
 ## run
 
-serve the directory with any local static server:
-
 ```bash
-# python
-python -m http.server 8080
-
-# node
-npx serve .
+npm install
+npm run dev
 ```
 
-or open `index.html` directly in any modern browser.
+build for production:
+```bash
+npm run build
+npm run preview
+```
+
+## add a tool
+
+1. create your component in `src/tools/YourTool.tsx` using `ToolLayout` and `Dropzone`.
+2. register it in `src/tools/registry.tsx` with `id`, `name`, `description`, `keywords`, `icon`, `route`, and `component`.
+3. the home grid, search index, command palette (`⌘K`), and router update automatically.
