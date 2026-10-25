@@ -1,94 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>Images to PDF Converter &mdash; Fast, Secure &amp; High Quality</title>
-    <meta name="description" content="Convert JPG, PNG, WEBP and other images to high-quality PDF in seconds. 100% private, client-side, mobile-friendly with custom reordering, rotation, and compression.">
-    <meta name="theme-color" content="#4f46e5">
+    <title>~/ghost/image-to-pdf</title>
+    <meta name="description" content="tactile client-side image sequence to pdf compiler with zero telemetry">
 
-    <!-- Google Fonts -->
+    <!-- Tri-Font Typography: Inter, Caveat, JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- jsPDF CDN -->
+    <!-- jsPDF Engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         :root {
-            --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-            --bg-body: #f8fafc;
-            --bg-card: #ffffff;
-            --bg-card-hover: #f1f5f9;
-            --bg-input: #f8fafc;
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --text-muted: #94a3b8;
-            --border-color: #e2e8f0;
-            --border-focus: #6366f1;
-            
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --primary-light: #eef2ff;
-            --primary-glow: rgba(79, 70, 229, 0.2);
+            /* typography */
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-script: 'Caveat', cursive;
+            --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
-            --success: #10b981;
-            --success-hover: #059669;
-            --success-light: #ecfdf5;
-
-            --danger: #ef4444;
-            --danger-hover: #dc2626;
-            --danger-light: #fef2f2;
-
-            --warning: #f59e0b;
-            --warning-light: #fffbeb;
-
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 18px;
-            --radius-xl: 24px;
-            --radius-pill: 9999px;
-
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.07);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-
-            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            /* transitions */
+            --ease-tactile: cubic-bezier(0.22, 1, 0.36, 1);
+            --transition-smooth: 220ms cubic-bezier(0.22, 1, 0.36, 1);
         }
 
+        /* Dark Mode (Obsidian Base — Default) */
         [data-theme="dark"] {
-            --bg-body: #0b0f19;
-            --bg-card: #131b2e;
-            --bg-card-hover: #1c263e;
-            --bg-input: #0e1424;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border-color: #1e293b;
-            --border-focus: #818cf8;
+            --bg-canvas: #09090B;
+            --dot-color: rgba(255, 255, 255, 0.07);
+            --bg-sticky: rgba(18, 18, 22, 0.84);
+            --bg-well: rgba(0, 0, 0, 0.42);
+            --border-well: rgba(255, 255, 255, 0.05);
+            --border-ui: rgba(255, 255, 255, 0.09);
+            --border-ui-hover: rgba(255, 255, 255, 0.18);
 
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --primary-light: #1e1b4b;
-            --primary-glow: rgba(99, 102, 241, 0.35);
+            --text-primary: #F4F4F6;
+            --text-secondary: #A1A1AA;
+            --text-muted: #71717A;
 
-            --success: #10b981;
-            --success-hover: #34d399;
-            --success-light: #064e3b;
+            /* Tinted Bento Cards */
+            --bento-amber-bg: rgba(120, 62, 18, 0.24);
+            --bento-amber-border: rgba(251, 146, 60, 0.16);
+            --bento-amber-border-hover: rgba(251, 146, 60, 0.38);
+            --bento-amber-text: #FEF3C7;
+            --bento-amber-icon-bg: rgba(251, 146, 60, 0.15);
 
-            --danger: #f87171;
-            --danger-hover: #ef4444;
-            --danger-light: #450a0a;
+            --bento-plum-bg: rgba(105, 24, 58, 0.24);
+            --bento-plum-border: rgba(244, 114, 182, 0.16);
+            --bento-plum-border-hover: rgba(244, 114, 182, 0.38);
+            --bento-plum-text: #FCE7F3;
+            --bento-plum-icon-bg: rgba(244, 114, 182, 0.15);
 
-            --warning: #fbbf24;
-            --warning-light: #451a03;
+            --bento-emerald-bg: rgba(14, 72, 52, 0.24);
+            --bento-emerald-border: rgba(52, 211, 153, 0.16);
+            --bento-emerald-text: #D1FAE5;
+            --bento-emerald-icon-bg: rgba(52, 211, 153, 0.15);
 
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+            --specular-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 10px 28px -8px rgba(0, 0, 0, 0.45);
+            --popover-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.12), 0 24px 48px -12px rgba(0, 0, 0, 0.7);
+            --pulse-dot-color: #34D399;
+            --pulse-dot-shadow: rgba(52, 211, 153, 0.4);
+            --code-bg: rgba(255, 255, 255, 0.06);
+            --row-hover: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Light Mode (Alabaster Base) */
+        [data-theme="light"] {
+            --bg-canvas: #FAF9F6;
+            --dot-color: rgba(0, 0, 0, 0.06);
+            --bg-sticky: rgba(255, 255, 255, 0.88);
+            --bg-well: #F1F0EC;
+            --border-well: rgba(0, 0, 0, 0.06);
+            --border-ui: rgba(0, 0, 0, 0.08);
+            --border-ui-hover: rgba(0, 0, 0, 0.18);
+
+            --text-primary: #111113;
+            --text-secondary: #52525B;
+            --text-muted: #71717A;
+
+            /* Tinted Bento Cards */
+            --bento-amber-bg: #FFFBEB;
+            --bento-amber-border: #FDE68A;
+            --bento-amber-border-hover: #F59E0B;
+            --bento-amber-text: #78350F;
+            --bento-amber-icon-bg: rgba(217, 119, 6, 0.15);
+
+            --bento-plum-bg: #FDF2F8;
+            --bento-plum-border: #FBCFE8;
+            --bento-plum-border-hover: #EC4899;
+            --bento-plum-text: #831843;
+            --bento-plum-icon-bg: rgba(219, 39, 119, 0.15);
+
+            --bento-emerald-bg: #ECFDF5;
+            --bento-emerald-border: #A7F3D0;
+            --bento-emerald-text: #064E3B;
+            --bento-emerald-icon-bg: rgba(16, 185, 129, 0.15);
+
+            --specular-shadow: inset 0 1px 0 0 #FFFFFF, 0 8px 24px -6px rgba(15, 23, 42, 0.06);
+            --popover-shadow: inset 0 1px 0 0 #FFFFFF, 0 20px 40px -10px rgba(15, 23, 42, 0.12);
+            --pulse-dot-color: #059669;
+            --pulse-dot-shadow: rgba(5, 150, 105, 0.3);
+            --code-bg: rgba(0, 0, 0, 0.05);
+            --row-hover: rgba(0, 0, 0, 0.02);
         }
 
         * {
@@ -99,570 +114,384 @@
         }
 
         body {
-            font-family: var(--font-family);
-            background-color: var(--bg-body);
+            font-family: var(--font-sans);
+            font-size: 15px;
+            line-height: 1.65;
             color: var(--text-primary);
-            line-height: 1.5;
+            background-color: var(--bg-canvas);
+            background-image: radial-gradient(circle, var(--dot-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: 0 0;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+            transition: background-color var(--transition-smooth), color var(--transition-smooth);
         }
 
-        /* Container */
-        .app-container {
+        /* Links with wavy underlines */
+        a.wavy-link, .wavy-link {
+            color: inherit;
+            text-decoration: underline wavy;
+            text-underline-offset: 5px;
+            cursor: pointer;
+            transition: opacity var(--transition-smooth);
+        }
+        a.wavy-link:hover, .wavy-link:hover {
+            opacity: 0.8;
+        }
+
+        /* Top Sticky Bar */
+        .sticky-bar {
+            position: sticky;
+            top: 0;
+            z-index: 40;
             width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 24px 16px 100px;
-            flex: 1;
+            background: var(--bg-sticky);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border-bottom: 1px solid var(--border-ui);
+            padding: 10px 20px;
+            transition: background var(--transition-smooth), border-color var(--transition-smooth);
         }
 
-        /* Top Header */
-        header.app-header {
+        .sticky-bar-inner {
+            max-width: 660px;
+            margin: 0 auto;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border-color);
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
             gap: 12px;
         }
 
-        .brand-logo {
-            width: 44px;
-            height: 44px;
-            border-radius: var(--radius-md);
-            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            box-shadow: 0 4px 12px var(--primary-glow);
-        }
-
-        .brand-logo svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        .brand-title {
-            font-size: 1.35rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
+        .breadcrumb {
+            font-family: var(--font-mono);
+            font-size: 12px;
             color: var(--text-primary);
-        }
-
-        .brand-subtitle {
-            font-size: 0.825rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .header-actions {
             display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .badge-secure {
-            display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 6px 12px;
-            background: var(--success-light);
-            color: var(--success);
-            border-radius: var(--radius-pill);
-            font-size: 0.775rem;
-            font-weight: 600;
-        }
-
-        .badge-secure svg {
-            width: 14px;
-            height: 14px;
-        }
-
-        .btn-icon-theme {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            width: 40px;
-            height: 40px;
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .btn-icon-theme:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--border-focus);
-        }
-
-        /* Dropzone Upload Section */
-        .upload-section {
-            margin-bottom: 24px;
-        }
-
-        .dropzone {
-            position: relative;
-            background: var(--bg-card);
-            border: 2px dashed var(--border-color);
-            border-radius: var(--radius-xl);
-            padding: 44px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-            box-shadow: var(--shadow-sm);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .dropzone:hover,
-        .dropzone.drag-active {
-            border-color: var(--primary);
-            background: var(--primary-light);
-            box-shadow: 0 0 0 4px var(--primary-glow);
-            transform: translateY(-2px);
-        }
-
-        .dropzone input[type="file"] {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-            z-index: 5;
-        }
-
-        .dropzone-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            background: var(--primary-light);
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
-            transition: var(--transition);
-        }
-
-        .dropzone:hover .dropzone-icon,
-        .dropzone.drag-active .dropzone-icon {
-            transform: scale(1.1);
-            background: var(--primary);
-            color: #ffffff;
-        }
-
-        .dropzone-icon svg {
-            width: 32px;
-            height: 32px;
-        }
-
-        .dropzone-title {
-            font-size: 1.15rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-            color: var(--text-primary);
-        }
-
-        .dropzone-desc {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-            max-width: 440px;
-        }
-
-        .btn-browse {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 22px;
-            background: var(--primary);
-            color: #ffffff;
-            font-size: 0.9rem;
-            font-weight: 600;
-            border-radius: var(--radius-pill);
-            box-shadow: 0 4px 12px var(--primary-glow);
-            transition: var(--transition);
-            pointer-events: none;
-        }
-
-        .dropzone-tags {
-            margin-top: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .file-tag {
-            font-size: 0.725rem;
-            font-weight: 600;
-            padding: 4px 10px;
-            background: var(--bg-input);
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            border-radius: var(--radius-pill);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        /* Settings Card Accordion / Grid */
-        .card-panel {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            margin-bottom: 24px;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .panel-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
+            text-decoration: none;
+            letter-spacing: -0.01em;
             user-select: none;
         }
 
-        .panel-header-left {
+        .breadcrumb-cursor {
+            display: inline-block;
+            width: 6px;
+            height: 12px;
+            background: var(--text-muted);
+            animation: blink 1.2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        .nav-actions {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
-        .panel-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: var(--radius-sm);
-            background: var(--primary-light);
-            color: var(--primary);
-            display: flex;
+        .telemetry-chip {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            padding: 4px 8px;
+            border-radius: 8px;
+            background: var(--bg-well);
+            border: 1px solid var(--border-well);
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-        }
-
-        .panel-icon svg {
-            width: 18px;
-            height: 18px;
-        }
-
-        .panel-title {
-            font-size: 1rem;
-            font-weight: 700;
-        }
-
-        .panel-toggle-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .panel-toggle-btn svg {
-            width: 20px;
-            height: 20px;
-            transition: transform 0.25s ease;
-        }
-
-        .panel-toggle-btn.rotated svg {
-            transform: rotate(180deg);
-        }
-
-        .settings-content {
-            margin-top: 18px;
-            padding-top: 18px;
-            border-top: 1px solid var(--border-color);
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            transition: max-height 0.3s ease;
-        }
-
-        .setting-group {
-            display: flex;
-            flex-direction: column;
             gap: 6px;
         }
 
-        .setting-label {
-            font-size: 0.825rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            display: flex;
+        .btn-tactile {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-primary);
+            background: var(--bg-well);
+            border: 1px solid var(--border-ui);
+            border-radius: 8px;
+            padding: 5px 9px;
+            cursor: pointer;
+            display: inline-flex;
             align-items: center;
             gap: 5px;
-        }
-
-        .setting-input,
-        .setting-select {
-            width: 100%;
-            padding: 10px 14px;
-            font-family: inherit;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text-primary);
-            background-color: var(--bg-input);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            outline: none;
-            transition: var(--transition);
-        }
-
-        .setting-input:focus,
-        .setting-select:focus {
-            border-color: var(--border-focus);
-            box-shadow: 0 0 0 3px var(--primary-glow);
-            background-color: var(--bg-card);
-        }
-
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
+            transition: all var(--transition-smooth);
             user-select: none;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-top: 10px;
         }
 
-        .checkbox-label input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--primary);
-            cursor: pointer;
+        .btn-tactile:hover {
+            border-color: var(--border-ui-hover);
+            transform: translateY(-1px);
         }
 
-        /* Toolbar & Image Count */
-        .gallery-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 14px;
-            margin-bottom: 18px;
+        .btn-tactile:active {
+            transform: translateY(0);
         }
 
-        .gallery-stats {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .btn-tactile kbd {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-muted);
+            background: var(--code-bg);
+            padding: 1px 4px;
+            border-radius: 4px;
         }
 
-        .gallery-badge {
-            font-size: 0.875rem;
-            font-weight: 700;
-            color: var(--primary);
-            background: var(--primary-light);
-            padding: 6px 14px;
-            border-radius: var(--radius-pill);
-        }
-
-        .gallery-hint {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .gallery-toolbar {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .btn-toolbar {
+        /* SVG Icon Helpers: 1.75px stroke with 15% opacity duotone fill container */
+        .icon-box {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 7px 14px;
-            font-size: 0.825rem;
-            font-weight: 600;
-            border-radius: var(--radius-md);
-            border: 1px solid var(--border-color);
-            background: var(--bg-card);
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: var(--transition);
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all var(--transition-smooth);
         }
 
-        .btn-toolbar:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--border-focus);
+        .icon-box svg {
+            width: 16px;
+            height: 16px;
+            stroke-width: 1.75;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
-        .btn-toolbar svg {
-            width: 15px;
-            height: 15px;
-        }
-
-        .btn-danger-outline {
-            color: var(--danger);
-            border-color: var(--border-color);
-        }
-
-        .btn-danger-outline:hover {
-            background: var(--danger-light);
-            border-color: var(--danger);
-            color: var(--danger);
-        }
-
-        /* Preview Grid */
-        .preview-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-            gap: 18px;
-            margin-bottom: 32px;
-        }
-
-        .empty-state {
-            grid-column: 1 / -1;
-            padding: 60px 20px;
-            text-align: center;
-            background: var(--bg-card);
-            border-radius: var(--radius-lg);
-            border: 1px dashed var(--border-color);
-            color: var(--text-secondary);
-        }
-
-        .empty-icon {
-            width: 48px;
-            height: 48px;
-            margin: 0 auto 12px;
-            color: var(--text-muted);
-        }
-
-        .empty-title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        /* Image Card */
-        .image-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            overflow: hidden;
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
+        /* Viewport Spine: 660px max-width container */
+        .viewport-spine {
+            max-width: 660px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px 20px 80px 20px;
             display: flex;
             flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Header typography */
+        .section-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: 17px;
+            letter-spacing: -0.03em;
+            color: var(--text-primary);
+        }
+
+        .script-note {
+            font-family: var(--font-script);
+            font-weight: 600;
+            font-size: 21px;
+            line-height: 1.3;
+            color: var(--text-secondary);
+            margin-left: 6px;
+        }
+
+        /* Tilted Bento Pair */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            perspective: 1000px;
+        }
+
+        @media (max-width: 580px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+        }
+
+        .bento-card {
+            border-radius: 14px;
+            padding: 18px;
             position: relative;
+            cursor: pointer;
             user-select: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 132px;
+            box-shadow: var(--specular-shadow);
+            transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-smooth);
+            will-change: transform;
         }
 
-        .image-card:hover {
-            box-shadow: var(--shadow-md);
-            border-color: var(--border-focus);
-            transform: translateY(-2px);
+        /* Tactile Card Rotation */
+        .bento-amber {
+            background: var(--bento-amber-bg);
+            border: 1px solid var(--bento-amber-border);
+            color: var(--bento-amber-text);
+            transform: rotate(-1.15deg);
         }
 
-        .image-card.dragging {
-            opacity: 0.4;
-            transform: scale(0.96);
-            border: 2px dashed var(--primary);
+        .bento-amber .icon-box {
+            background: var(--bento-amber-icon-bg);
+            color: var(--bento-amber-text);
         }
 
-        .image-card.drag-over-item {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px var(--primary);
+        .bento-amber:hover, .bento-amber:focus-within {
+            transform: rotate(0deg) translateY(-2px);
+            border-color: var(--bento-amber-border-hover);
         }
 
-        .card-header-bar {
-            padding: 8px 12px;
+        .bento-plum {
+            background: var(--bento-plum-bg);
+            border: 1px solid var(--bento-plum-border);
+            color: var(--bento-plum-text);
+            transform: rotate(1.05deg);
+        }
+
+        .bento-plum .icon-box {
+            background: var(--bento-plum-icon-bg);
+            color: var(--bento-plum-text);
+        }
+
+        .bento-plum:hover, .bento-plum:focus-within {
+            transform: rotate(0deg) translateY(-2px);
+            border-color: var(--bento-plum-border-hover);
+        }
+
+        .bento-plum.disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            pointer-events: none;
+            transform: rotate(1.05deg) !important;
+        }
+
+        .bento-top-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .bento-card-title {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .bento-script {
+            font-family: var(--font-script);
+            font-weight: 600;
+            font-size: 21px;
+            line-height: 1.2;
+            display: block;
+            margin-top: -2px;
+            opacity: 0.92;
+        }
+
+        .bento-subtext {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            opacity: 0.75;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        /* Dragover state for dropzone */
+        .bento-amber.dragover {
+            border-color: var(--bento-amber-text);
+            transform: rotate(0deg) scale(1.02);
+        }
+
+        /* Emerald Nested Well Card: Telemetry & Live State */
+        .emerald-well {
+            background: var(--bento-emerald-bg);
+            border: 1px solid var(--bento-emerald-border);
+            border-radius: 14px;
+            padding: 16px 18px;
+            color: var(--bento-emerald-text);
+            box-shadow: var(--specular-shadow);
+        }
+
+        .emerald-well-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: var(--bg-input);
-            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 12px;
         }
 
-        .card-index {
-            font-size: 0.775rem;
-            font-weight: 700;
-            color: var(--primary);
+        .emerald-well-title-group {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 8px;
         }
 
-        .card-filesize {
-            font-size: 0.725rem;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .card-image-wrap {
+        /* Live Pulse Dot (6px circle) */
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 9999px;
+            background-color: var(--pulse-dot-color);
             position: relative;
-            width: 100%;
-            height: 180px;
-            background: #0000000a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            cursor: pointer;
+            display: inline-block;
         }
 
-        .card-img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .zoom-overlay {
+        .pulse-dot::after {
+            content: '';
             position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.4);
-            opacity: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            transition: opacity 0.2s ease;
-            gap: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            inset: -3px;
+            border-radius: 9999px;
+            background-color: var(--pulse-dot-shadow);
+            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
 
-        .card-image-wrap:hover .zoom-overlay {
-            opacity: 1;
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            50% { transform: scale(1.8); opacity: 0; }
+            100% { transform: scale(0.8); opacity: 0; }
         }
 
-        .card-body {
-            padding: 10px 12px;
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        @media (max-width: 540px) {
+            .telemetry-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .telemetry-metric {
+            background: var(--bg-well);
+            border: 1px solid var(--border-well);
+            border-radius: 10px;
+            padding: 8px 10px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            flex: 1;
+            gap: 2px;
         }
 
-        .card-filename {
-            font-size: 0.8rem;
+        .metric-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .metric-value {
+            font-family: var(--font-mono);
+            font-size: 13px;
             font-weight: 600;
             color: var(--text-primary);
             white-space: nowrap;
@@ -670,1385 +499,411 @@
             text-overflow: ellipsis;
         }
 
-        .card-actions-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1.2fr;
-            gap: 6px;
-            margin-top: auto;
-        }
-
-        .btn-card-action {
+        /* Queue List & Indexed Rows */
+        .queue-container {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 7px 4px;
-            background: var(--bg-input);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 0.775rem;
-            font-weight: 600;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        .btn-card-action:hover:not(:disabled) {
-            background: var(--bg-card-hover);
-            border-color: var(--border-focus);
-            color: var(--primary);
-        }
-
-        .btn-card-action:disabled {
-            opacity: 0.35;
-            cursor: not-allowed;
-        }
-
-        .btn-card-action svg {
-            width: 14px;
-            height: 14px;
-        }
-
-        .btn-card-delete {
-            color: var(--danger);
-        }
-
-        .btn-card-delete:hover:not(:disabled) {
-            background: var(--danger-light);
-            border-color: var(--danger);
-            color: var(--danger);
-        }
-
-        /* Bottom Floating Sticky Action Bar */
-        .bottom-action-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--bg-card);
-            border-top: 1px solid var(--border-color);
-            padding: 14px 20px;
-            box-shadow: var(--shadow-xl);
-            z-index: 100;
+        .queue-header-actions {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(12px);
-            background-color: rgba(255, 255, 255, 0.9);
-        }
-
-        [data-theme="dark"] .bottom-action-bar {
-            background-color: rgba(19, 27, 46, 0.92);
-        }
-
-        .bottom-action-inner {
-            width: 100%;
-            max-width: 1200px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .bottom-summary {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .summary-count {
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: var(--text-primary);
-        }
-
-        .summary-hint {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .bottom-buttons {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-primary-generate {
-            display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 12px 28px;
-            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
-            color: #ffffff;
-            font-size: 0.95rem;
-            font-weight: 700;
-            border-radius: var(--radius-pill);
-            border: none;
+        }
+
+        .queue-empty-well {
+            background: var(--bg-well);
+            border: 1px dashed var(--border-ui);
+            border-radius: 10px;
+            padding: 32px 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .queue-row {
+            background: var(--bg-well);
+            border: 1px solid var(--border-well);
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all var(--transition-smooth);
+            user-select: none;
+            position: relative;
+        }
+
+        .queue-row:hover {
+            border-color: var(--border-ui-hover);
+            background: var(--row-hover);
+        }
+
+        .queue-row.dragging {
+            opacity: 0.35;
+            border: 1px dashed var(--text-muted);
+        }
+
+        .row-drag-handle {
+            cursor: grab;
+            color: var(--text-muted);
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .row-drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .row-index {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            width: 24px;
+            flex-shrink: 0;
+        }
+
+        .row-thumb-container {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            border: 1px solid var(--border-ui);
+            background: var(--code-bg);
+            overflow: hidden;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .row-thumb {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+            transition: transform var(--transition-smooth);
+        }
+
+        .row-meta {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .row-name {
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sub-branch {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .row-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .icon-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            border: 1px solid var(--border-ui);
+            background: transparent;
+            color: var(--text-secondary);
             cursor: pointer;
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
-            transition: var(--transition);
-        }
-
-        .btn-primary-generate:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
-        }
-
-        .btn-primary-generate:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .btn-primary-generate svg {
-            width: 18px;
-            height: 18px;
-        }
-
-        .btn-clear-all {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 12px 18px;
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            font-weight: 600;
-            border-radius: var(--radius-pill);
-            cursor: pointer;
-            transition: var(--transition);
+            justify-content: center;
+            transition: all var(--transition-smooth);
         }
 
-        .btn-clear-all:hover:not(:disabled) {
-            background: var(--danger-light);
-            border-color: var(--danger);
-            color: var(--danger);
+        .icon-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--border-ui-hover);
+            background: var(--code-bg);
+            transform: translateY(-1px);
         }
 
-        .btn-clear-all:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
+        .icon-btn.danger:hover {
+            color: #EF4444;
+            border-color: rgba(239, 68, 68, 0.4);
+            background: rgba(239, 68, 68, 0.1);
         }
 
-        /* Modal Lightbox & Progress Dialog */
-        .modal-overlay {
+        .icon-btn svg {
+            width: 14px;
+            height: 14px;
+            stroke-width: 1.75;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* macOS Popover Dialog: ⌘K Settings */
+        .popover-backdrop {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(6px);
-            z-index: 1000;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 99;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.25s ease;
+            transition: opacity var(--transition-smooth);
         }
 
-        .modal-overlay.active {
+        .popover-backdrop.active {
             opacity: 1;
             pointer-events: auto;
         }
 
-        .modal-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-xl);
-            max-width: 600px;
+        .popover-card {
             width: 100%;
-            padding: 28px;
-            box-shadow: var(--shadow-xl);
-            text-align: center;
-            transform: scale(0.95);
-            transition: transform 0.25s ease;
-        }
-
-        .modal-overlay.active .modal-card {
-            transform: scale(1);
-        }
-
-        .modal-preview-card {
-            max-width: 90vw;
+            max-width: 520px;
             max-height: 90vh;
-            padding: 16px;
+            overflow-y: auto;
+            border-radius: 16px;
+            background: var(--bg-sticky);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border: 1px solid var(--border-ui);
+            box-shadow: var(--popover-shadow);
+            padding: 20px;
             display: flex;
             flex-direction: column;
+            gap: 16px;
+            transform: scale(0.97) translateY(8px);
+            transition: transform var(--transition-smooth);
+        }
+
+        .popover-backdrop.active .popover-card {
+            transform: scale(1) translateY(0);
+        }
+
+        .popover-header {
+            display: flex;
             align-items: center;
+            justify-content: space-between;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--border-ui);
         }
 
-        .modal-preview-img {
-            max-width: 100%;
-            max-height: calc(85vh - 70px);
-            object-fit: contain;
-            border-radius: var(--radius-md);
+        .popover-title {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-primary);
+            font-weight: 500;
         }
 
-        .modal-close-btn {
-            align-self: flex-end;
+        .dashed-divider {
+            height: 1px;
+            border: none;
+            border-top: 1px dashed var(--border-ui);
+            margin: 2px 0;
+        }
+
+        .settings-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .settings-label-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .settings-label {
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .settings-hint {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .text-input {
+            width: 100%;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-primary);
+            background: var(--bg-well);
+            border: 1px solid var(--border-well);
+            border-radius: 8px;
+            padding: 8px 12px;
+            outline: none;
+            transition: border-color var(--transition-smooth);
+        }
+
+        .text-input:focus {
+            border-color: var(--border-ui-hover);
+        }
+
+        .segmented-group {
+            display: flex;
+            background: var(--bg-well);
+            border: 1px solid var(--border-well);
+            border-radius: 8px;
+            padding: 3px;
+            gap: 3px;
+        }
+
+        .segmented-btn {
+            flex: 1;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
             background: transparent;
             border: none;
-            color: var(--text-primary);
+            border-radius: 6px;
+            padding: 6px 8px;
             cursor: pointer;
-            margin-bottom: 8px;
-            padding: 6px;
+            text-align: center;
+            transition: all var(--transition-smooth);
+            user-select: none;
         }
 
-        .modal-close-btn svg {
-            width: 24px;
-            height: 24px;
+        .segmented-btn.active {
+            color: var(--text-primary);
+            background: var(--bg-sticky);
+            border: 1px solid var(--border-ui);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
-        /* Progress Bar */
-        .progress-bar-container {
+        .slider-control {
+            -webkit-appearance: none;
+            appearance: none;
             width: 100%;
-            height: 10px;
-            background: var(--bg-input);
-            border-radius: var(--radius-pill);
+            height: 4px;
+            background: var(--border-ui);
+            border-radius: 4px;
+            outline: none;
+            margin: 6px 0;
+        }
+
+        .slider-control::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 5px;
+            background: var(--text-primary);
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .popover-footer {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 8px;
+        }
+
+        /* Compiling Progress Overlay */
+        .progress-indicator {
+            display: none;
+            background: var(--bg-well);
+            border: 1px solid var(--border-well);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-top: 8px;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .progress-indicator.active {
+            display: flex;
+        }
+
+        .progress-bar-track {
+            width: 100%;
+            height: 4px;
+            background: var(--border-ui);
+            border-radius: 4px;
             overflow: hidden;
-            margin: 20px 0 12px;
-            position: relative;
-            border: 1px solid var(--border-color);
         }
 
         .progress-bar-fill {
-            height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, var(--primary) 0%, var(--success) 100%);
-            border-radius: var(--radius-pill);
-            transition: width 0.15s ease;
+            height: 100%;
+            background: var(--bento-plum-text);
+            transition: width 100ms ease;
         }
 
         .progress-status-text {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 6px;
-        }
-
-        .progress-subtext {
-            font-size: 0.8rem;
+            font-family: var(--font-mono);
+            font-size: 11px;
             color: var(--text-secondary);
         }
 
-        /* Success Download Banner Card */
-        .success-result-card {
-            background: var(--bg-card);
-            border: 2px solid var(--success);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            margin-bottom: 24px;
+        /* Success Banner */
+        .export-success-well {
             display: none;
+            background: var(--bento-emerald-bg);
+            border: 1px solid var(--bento-emerald-border);
+            border-radius: 10px;
+            padding: 14px 16px;
             align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 16px;
-            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
-            animation: fadeIn 0.3s ease;
+            color: var(--bento-emerald-text);
         }
 
-        .success-result-card.active {
+        .export-success-well.active {
             display: flex;
         }
 
-        .success-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
+        .export-details {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            line-height: 1.4;
         }
 
-        .success-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: var(--success-light);
-            color: var(--success);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .success-icon svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        .success-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .success-desc {
-            font-size: 0.825rem;
-            color: var(--text-secondary);
-        }
-
-        .success-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-download-again {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 10px 20px;
-            background: var(--success);
-            color: #ffffff;
-            font-size: 0.875rem;
-            font-weight: 700;
-            border-radius: var(--radius-pill);
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .btn-download-again:hover {
-            background: var(--success-hover);
-        }
-
-        .btn-download-again svg {
-            width: 16px;
-            height: 16px;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Responsive Breakpoints */
-        @media (max-width: 768px) {
-            .app-container {
-                padding: 16px 12px 110px;
-            }
-
-            .brand-title {
-                font-size: 1.15rem;
-            }
-
-            .dropzone {
-                padding: 30px 14px;
-            }
-
-            .dropzone-icon {
-                width: 52px;
-                height: 52px;
-                margin-bottom: 12px;
-            }
-
-            .preview-grid {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-                gap: 12px;
-            }
-
-            .card-image-wrap {
-                height: 140px;
-            }
-
-            .settings-content {
-                grid-template-columns: 1fr;
-            }
-
-            .bottom-action-inner {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .bottom-buttons {
-                width: 100%;
-            }
-
-            .btn-primary-generate {
-                flex: 1;
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .preview-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-            }
-
-            .card-actions-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .btn-toolbar span {
-                display: none;
-            }
+        /* Footer */
+        .page-footer {
+            margin-top: 24px;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
         }
     </style>
 </head>
-
-<body>
-
-<div class="app-container">
-
-    <!-- Header -->
-    <header class="app-header">
-        <div class="brand">
-            <div class="brand-logo" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                    <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-            </div>
-            <div>
-                <h1 class="brand-title">Images to PDF Converter</h1>
-                <p class="brand-subtitle">Merge, reorder &amp; optimize multiple photos into one PDF</p>
-            </div>
-        </div>
-
-        <div class="header-actions">
-            <div class="badge-secure" title="All processing happens locally inside your browser. No files are uploaded to any server.">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                </svg>
-                <span>100% Private</span>
-            </div>
-
-            <button id="themeToggleBtn" class="btn-icon-theme" aria-label="Toggle light or dark theme" title="Toggle theme">
-                <svg id="themeIconSun" style="display:none;" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="5"></circle>
-                    <line x1="12" y1="1" x2="12" y2="3"></line>
-                    <line x1="12" y1="21" x2="12" y2="23"></line>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                    <line x1="1" y1="12" x2="3" y2="12"></line>
-                    <line x1="21" y1="12" x2="23" y2="12"></line>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                </svg>
-                <svg id="themeIconMoon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                </svg>
-            </button>
-        </div>
-    </header>
-
-    <!-- Upload Dropzone Area -->
-    <section class="upload-section" aria-label="Upload Images">
-        <label id="dropzone" class="dropzone">
-            <input
-                id="imageInput"
-                type="file"
-                accept="image/png, image/jpeg, image/jpg, image/webp, image/gif, image/bmp, image/svg+xml"
-                multiple
-            >
-            <div class="dropzone-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-            </div>
-            <div class="dropzone-title">Drag &amp; drop images here</div>
-            <p class="dropzone-desc">or click to browse from device. You can also paste copied images (Ctrl+V).</p>
-            <div class="btn-browse">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 5v14M5 12h14"></path>
-                </svg>
-                Browse Images
-            </div>
-            <div class="dropzone-tags">
-                <span class="file-tag">JPG</span>
-                <span class="file-tag">PNG</span>
-                <span class="file-tag">WEBP</span>
-                <span class="file-tag">GIF</span>
-                <span class="file-tag">BMP</span>
-                <span class="file-tag">SVG</span>
-            </div>
-        </label>
-    </section>
-
-    <!-- Success Result Banner (Hidden by default) -->
-    <div id="successCard" class="success-result-card">
-        <div class="success-left">
-            <div class="success-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-            </div>
-            <div>
-                <div class="success-title">PDF Generated Successfully!</div>
-                <div id="successDetails" class="success-desc">Ready for download.</div>
-            </div>
-        </div>
-        <div class="success-actions">
-            <a id="downloadAgainBtn" class="btn-download-again" href="#" download="document.pdf">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                Download PDF
-            </a>
-        </div>
-    </div>
-
-    <!-- PDF Settings Panel -->
-    <section class="card-panel" aria-label="PDF Document Settings">
-        <div id="settingsToggle" class="panel-header">
-            <div class="panel-header-left">
-                <div class="panel-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                    </svg>
-                </div>
-                <h2 class="panel-title">PDF Layout &amp; Output Settings</h2>
-            </div>
-            <button class="panel-toggle-btn" aria-label="Toggle settings visibility">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            </button>
-        </div>
-
-        <div id="settingsBody" class="settings-content">
-            <!-- Page Size -->
-            <div class="setting-group">
-                <label class="setting-label" for="pageSize">
-                    <span>Page Size</span>
-                </label>
-                <select id="pageSize" class="setting-select">
-                    <option value="a4" selected>A4 (210 x 297 mm)</option>
-                    <option value="letter">US Letter (8.5 x 11 in)</option>
-                    <option value="legal">US Legal</option>
-                    <option value="a3">A3 (297 x 420 mm)</option>
-                    <option value="a5">A5 (148 x 210 mm)</option>
-                    <option value="fit">Fit to Image (No Borders)</option>
-                </select>
-            </div>
-
-            <!-- Orientation -->
-            <div class="setting-group">
-                <label class="setting-label" for="orientation">
-                    <span>Orientation</span>
-                </label>
-                <select id="orientation" class="setting-select">
-                    <option value="auto" selected>Auto-Detect (Per Image)</option>
-                    <option value="portrait">Portrait</option>
-                    <option value="landscape">Landscape</option>
-                </select>
-            </div>
-
-            <!-- Margin -->
-            <div class="setting-group">
-                <label class="setting-label" for="marginPreset">
-                    <span>Margin</span>
-                </label>
-                <select id="marginPreset" class="setting-select">
-                    <option value="0">No Margin (0 mm)</option>
-                    <option value="5">Small (5 mm)</option>
-                    <option value="10" selected>Standard (10 mm)</option>
-                    <option value="20">Large (20 mm)</option>
-                </select>
-            </div>
-
-            <!-- Image Fit Layout -->
-            <div class="setting-group">
-                <label class="setting-label" for="layoutMode">
-                    <span>Image Fit Mode</span>
-                </label>
-                <select id="layoutMode" class="setting-select">
-                    <option value="contain" selected>Fit Entire Image (Contain)</option>
-                    <option value="cover">Fill Entire Page (Crop)</option>
-                </select>
-            </div>
-
-            <!-- Quality & Compression -->
-            <div class="setting-group">
-                <label class="setting-label" for="quality">
-                    <span>Image Quality / Size</span>
-                </label>
-                <select id="quality" class="setting-select">
-                    <option value="0.95">High Quality (Large)</option>
-                    <option value="0.85" selected>Standard Quality (Recommended)</option>
-                    <option value="0.70">Medium Quality (Smaller)</option>
-                    <option value="0.50">Max Compression (Smallest File)</option>
-                </select>
-            </div>
-
-            <!-- Custom PDF Name -->
-            <div class="setting-group">
-                <label class="setting-label" for="pdfFileName">
-                    <span>File Name</span>
-                </label>
-                <input
-                    id="pdfFileName"
-                    class="setting-input"
-                    type="text"
-                    placeholder="images-to-pdf.pdf"
-                >
-            </div>
-
-            <!-- Options Checkboxes -->
-            <div class="setting-group" style="grid-column: 1 / -1;">
-                <label class="checkbox-label">
-                    <input id="addPageNumbers" type="checkbox">
-                    <span>Add page numbers in footer (e.g. Page 1 of 5)</span>
-                </label>
-            </div>
-        </div>
-    </section>
-
-    <!-- Images Gallery Header & Actions -->
-    <div class="gallery-header">
-        <div class="gallery-stats">
-            <span id="imageCountBadge" class="gallery-badge">0 Images</span>
-            <span class="gallery-hint">Drag or use arrow buttons to reorder</span>
-        </div>
-
-        <div class="gallery-toolbar">
-            <button id="sortNameBtn" class="btn-toolbar" title="Sort images by filename">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M15 18H3M21 6H3M17 12H3"></path>
-                </svg>
-                <span>Sort Name</span>
-            </button>
-            <button id="reverseBtn" class="btn-toolbar" title="Reverse the page order">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="17 1 21 5 17 9"></polyline>
-                    <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
-                    <polyline points="7 23 3 19 7 15"></polyline>
-                    <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
-                </svg>
-                <span>Reverse</span>
-            </button>
-            <button id="rotateAllBtn" class="btn-toolbar" title="Rotate all images 90 deg clockwise">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="23 4 23 10 17 10"></polyline>
-                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                </svg>
-                <span>Rotate All</span>
-            </button>
-            <button id="clearAllTopBtn" class="btn-toolbar btn-danger-outline" title="Remove all selected images">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-                <span>Clear All</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Preview Grid -->
-    <main id="previewGrid" class="preview-grid" aria-label="Image Preview Grid">
-        <div class="empty-state">
-            <div class="empty-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                    <polyline points="21 15 16 10 5 21"></polyline>
-                </svg>
-            </div>
-            <div class="empty-title">No images selected yet</div>
-            <p>Upload or drag images above to preview and build your PDF.</p>
-        </div>
-    </main>
-
-</div>
-
-<!-- Bottom Floating Sticky Action Bar -->
-<div class="bottom-action-bar">
-    <div class="bottom-action-inner">
-        <div class="bottom-summary">
-            <span id="bottomCountText" class="summary-count">0 images ready</span>
-            <span id="bottomSizeText" class="summary-hint">0 KB total</span>
-        </div>
-
-        <div class="bottom-buttons">
-            <button id="clearAllBtn" class="btn-clear-all" disabled>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-                Clear
-            </button>
-
-            <button id="generatePdfBtn" class="btn-primary-generate" disabled>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="12" y1="18" x2="12" y2="12"></line>
-                    <line x1="9" y1="15" x2="15" y2="15"></line>
-                </svg>
-                <span>Generate PDF</span>
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Progress Modal -->
-<div id="progressModal" class="modal-overlay">
-    <div class="modal-card">
-        <h3 id="progressModalTitle" style="font-size: 1.25rem; font-weight: 700; margin-bottom: 6px;">Converting to PDF...</h3>
-        <div id="progressStatusText" class="progress-status-text">Processing image 1 of 5...</div>
-        
-        <div class="progress-bar-container">
-            <div id="progressBarFill" class="progress-bar-fill"></div>
-        </div>
-
-        <div id="progressSubtext" class="progress-subtext">Rendering high-res canvas pages...</div>
-    </div>
-</div>
-
-<!-- Image Lightbox Modal -->
-<div id="lightboxModal" class="modal-overlay">
-    <div class="modal-card modal-preview-card">
-        <button id="lightboxCloseBtn" class="modal-close-btn" aria-label="Close preview">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-        </button>
-        <img id="lightboxImg" class="modal-preview-img" src="" alt="Full Preview">
-    </div>
-</div>
-
-<script>
-    (function () {
-        'use strict';
-
-        // State Store
-        let imageList = [];
-        let isProcessing = false;
-        let lastGeneratedPdfBlob = null;
-        let lastGeneratedPdfName = 'images-to-pdf.pdf';
-
-        // DOM Elements
-        const dropzone = document.getElementById('dropzone');
-        const imageInput = document.getElementById('imageInput');
-        const previewGrid = document.getElementById('previewGrid');
-        const imageCountBadge = document.getElementById('imageCountBadge');
-        const bottomCountText = document.getElementById('bottomCountText');
-        const bottomSizeText = document.getElementById('bottomSizeText');
-        const generatePdfBtn = document.getElementById('generatePdfBtn');
-        const clearAllBtn = document.getElementById('clearAllBtn');
-        const clearAllTopBtn = document.getElementById('clearAllTopBtn');
-        const sortNameBtn = document.getElementById('sortNameBtn');
-        const reverseBtn = document.getElementById('reverseBtn');
-        const rotateAllBtn = document.getElementById('rotateAllBtn');
-        const settingsToggle = document.getElementById('settingsToggle');
-        const settingsBody = document.getElementById('settingsBody');
-        const themeToggleBtn = document.getElementById('themeToggleBtn');
-        const themeIconSun = document.getElementById('themeIconSun');
-        const themeIconMoon = document.getElementById('themeIconMoon');
-        const successCard = document.getElementById('successCard');
-        const successDetails = document.getElementById('successDetails');
-        const downloadAgainBtn = document.getElementById('downloadAgainBtn');
-
-        // Modals
-        const progressModal = document.getElementById('progressModal');
-        const progressBarFill = document.getElementById('progressBarFill');
-        const progressStatusText = document.getElementById('progressStatusText');
-        const progressSubtext = document.getElementById('progressSubtext');
-        const lightboxModal = document.getElementById('lightboxModal');
-        const lightboxImg = document.getElementById('lightboxImg');
-        const lightboxCloseBtn = document.getElementById('lightboxCloseBtn');
-
-        // Theme Support
-        function initTheme() {
-            const savedTheme = localStorage.getItem('theme') || 
-                (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-            setTheme(savedTheme);
-        }
-
-        function setTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
-            if (theme === 'dark') {
-                themeIconSun.style.display = 'block';
-                themeIconMoon.style.display = 'none';
-            } else {
-                themeIconSun.style.display = 'none';
-                themeIconMoon.style.display = 'block';
-            }
-        }
-
-        themeToggleBtn.addEventListener('click', () => {
-            const current = document.documentElement.getAttribute('data-theme') || 'light';
-            setTheme(current === 'dark' ? 'light' : 'dark');
-        });
-
-        initTheme();
-
-        // Settings Collapsible
-        settingsToggle.addEventListener('click', () => {
-            const toggleIcon = settingsToggle.querySelector('.panel-toggle-btn');
-            if (settingsBody.style.display === 'none') {
-                settingsBody.style.display = 'grid';
-                toggleIcon.classList.remove('rotated');
-            } else {
-                settingsBody.style.display = 'none';
-                toggleIcon.classList.add('rotated');
-            }
-        });
-
-        // Set default filename with today's date
-        const defaultFilename = `images-to-pdf-${new Date().toISOString().slice(0, 10)}.pdf`;
-        document.getElementById('pdfFileName').value = defaultFilename;
-
-        // Format File Sizes
-        function formatBytes(bytes) {
-            if (bytes === 0) return '0 B';
-            const k = 1024;
-            const sizes = ['B', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-        }
-
-        // File Ingestion Handler
-        function handleFiles(files) {
-            const validFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
-            if (!validFiles.length) return;
-
-            validFiles.forEach(file => {
-                const previewUrl = URL.createObjectURL(file);
-                imageList.push({
-                    id: 'img_' + Math.random().toString(36).substr(2, 9) + Date.now(),
-                    file: file,
-                    previewUrl: previewUrl,
-                    name: file.name,
-                    size: file.size,
-                    rotation: 0
-                });
-            });
-
-            // Hide success card if new files added
-            successCard.classList.remove('active');
-            renderGallery();
-        }
-
-        // File Input Change
-        imageInput.addEventListener('change', function () {
-            handleFiles(this.files);
-            this.value = ''; // Reset for re-selecting same files
-        });
-
-        // Drag & Drop on Dropzone
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropzone.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                dropzone.classList.add('drag-active');
-            }, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropzone.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                dropzone.classList.remove('drag-active');
-            }, false);
-        });
-
-        dropzone.addEventListener('drop', (e) => {
-            const dt = e.dataTransfer;
-            if (dt && dt.files) {
-                handleFiles(dt.files);
-            }
-        });
-
-        // Global Paste Listener (Ctrl+V / Cmd+V)
-        window.addEventListener('paste', (e) => {
-            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            const pastedFiles = [];
-            for (let index in items) {
-                const item = items[index];
-                if (item.kind === 'file' && item.type.startsWith('image/')) {
-                    const blob = item.getAsFile();
-                    pastedFiles.push(blob);
-                }
-            }
-            if (pastedFiles.length > 0) {
-                handleFiles(pastedFiles);
-            }
-        });
-
-        // Render Gallery & Re-bind Events
-        let draggedIndex = null;
-
-        function renderGallery() {
-            const totalCount = imageList.length;
-            const totalBytes = imageList.reduce((acc, curr) => acc + curr.size, 0);
-
-            imageCountBadge.textContent = `${totalCount} Image${totalCount !== 1 ? 's' : ''}`;
-            bottomCountText.textContent = `${totalCount} image${totalCount !== 1 ? 's' : ''} ready`;
-            bottomSizeText.textContent = `${formatBytes(totalBytes)} total`;
-
-            const hasImages = totalCount > 0;
-            generatePdfBtn.disabled = !hasImages;
-            clearAllBtn.disabled = !hasImages;
-            clearAllTopBtn.disabled = !hasImages;
-            sortNameBtn.disabled = !hasImages;
-            reverseBtn.disabled = !hasImages;
-            rotateAllBtn.disabled = !hasImages;
-
-            if (!hasImages) {
-                previewGrid.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                <polyline points="21 15 16 10 5 21"></polyline>
-                            </svg>
-                        </div>
-                        <div class="empty-title">No images selected yet</div>
-                        <p>Upload or drag images above to preview and build your PDF.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            previewGrid.innerHTML = '';
-
-            imageList.forEach((item, index) => {
-                const card = document.createElement('article');
-                card.className = 'image-card';
-                card.draggable = true;
-                card.dataset.index = index;
-
-                card.innerHTML = `
-                    <div class="card-header-bar">
-                        <span class="card-index">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            </svg>
-                            Page ${index + 1}
-                        </span>
-                        <span class="card-filesize">${formatBytes(item.size)}</span>
-                    </div>
-
-                    <div class="card-image-wrap" title="Click to view full image">
-                        <img 
-                            class="card-img" 
-                            src="${item.previewUrl}" 
-                            alt="${escapeHtml(item.name)}" 
-                            style="transform: rotate(${item.rotation}deg);"
-                            loading="lazy"
-                        >
-                        <div class="zoom-overlay">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                <line x1="11" y1="8" x2="11" y2="14"></line>
-                                <line x1="8" y1="11" x2="14" y2="11"></line>
-                            </svg>
-                            <span>Preview</span>
-                        </div>
-                    </div>
-
-                    <div class="card-body">
-                        <div class="card-filename" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
-                        <div class="card-actions-grid">
-                            <button class="btn-card-action btn-move-left" title="Move page up / left" ${index === 0 ? 'disabled' : ''} aria-label="Move left">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="15 18 9 12 15 6"></polyline>
-                                </svg>
-                            </button>
-                            <button class="btn-card-action btn-move-right" title="Move page down / right" ${index === totalCount - 1 ? 'disabled' : ''} aria-label="Move right">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="9 18 15 12 9 6"></polyline>
-                                </svg>
-                            </button>
-                            <button class="btn-card-action btn-rotate" title="Rotate 90 deg Clockwise" aria-label="Rotate 90 degrees">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="23 4 23 10 17 10"></polyline>
-                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                                </svg>
-                            </button>
-                            <button class="btn-card-action btn-card-delete" title="Remove image" aria-label="Remove image">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                `;
-
-                // Event: Click to Lightbox
-                card.querySelector('.card-image-wrap').addEventListener('click', () => {
-                    openLightbox(item.previewUrl, item.rotation);
-                });
-
-                // Event: Move Left
-                card.querySelector('.btn-move-left').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (index > 0) {
-                        const temp = imageList[index];
-                        imageList[index] = imageList[index - 1];
-                        imageList[index - 1] = temp;
-                        renderGallery();
-                    }
-                });
-
-                // Event: Move Right
-                card.querySelector('.btn-move-right').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (index < imageList.length - 1) {
-                        const temp = imageList[index];
-                        imageList[index] = imageList[index + 1];
-                        imageList[index + 1] = temp;
-                        renderGallery();
-                    }
-                });
-
-                // Event: Rotate 90
-                card.querySelector('.btn-rotate').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    item.rotation = (item.rotation + 90) % 360;
-                    const imgEl = card.querySelector('.card-img');
-                    imgEl.style.transform = `rotate(${item.rotation}deg)`;
-                });
-
-                // Event: Delete Single
-                card.querySelector('.btn-card-delete').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    URL.revokeObjectURL(item.previewUrl);
-                    imageList.splice(index, 1);
-                    renderGallery();
-                });
-
-                // HTML5 Drag & Drop Reordering
-                card.addEventListener('dragstart', (e) => {
-                    draggedIndex = index;
-                    card.classList.add('dragging');
-                    e.dataTransfer.effectAllowed = 'move';
-                    e.dataTransfer.setData('text/plain', index);
-                });
-
-                card.addEventListener('dragend', () => {
-                    card.classList.remove('dragging');
-                    draggedIndex = null;
-                    document.querySelectorAll('.image-card').forEach(c => c.classList.remove('drag-over-item'));
-                });
-
-                card.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = 'move';
-                    card.classList.add('drag-over-item');
-                });
-
-                card.addEventListener('dragleave', () => {
-                    card.classList.remove('drag-over-item');
-                });
-
-                card.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    card.classList.remove('drag-over-item');
-                    const targetIndex = index;
-                    if (draggedIndex !== null && draggedIndex !== targetIndex) {
-                        const movedItem = imageList.splice(draggedIndex, 1)[0];
-                        imageList.splice(targetIndex, 0, movedItem);
-                        renderGallery();
-                    }
-                });
-
-                previewGrid.appendChild(card);
-            });
-        }
-
-        function escapeHtml(str) {
-            return String(str).replace(/[&<>"']/g, function (match) {
-                return {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#39;'
-                }[match];
-            });
-        }
-
-        // Lightbox Handler
-        function openLightbox(url, rotation) {
-            lightboxImg.src = url;
-            lightboxImg.style.transform = `rotate(${rotation}deg)`;
-            lightboxModal.classList.add('active');
-        }
-
-        function closeLightbox() {
-            lightboxModal.classList.remove('active');
-            lightboxImg.src = '';
-        }
-
-        lightboxCloseBtn.addEventListener('click', closeLightbox);
-        lightboxModal.addEventListener('click', (e) => {
-            if (e.target === lightboxModal) closeLightbox();
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeLightbox();
-        });
-
-        // Batch Actions
-        function clearAllImages() {
-            if (!imageList.length) return;
-            imageList.forEach(item => URL.revokeObjectURL(item.previewUrl));
-            imageList = [];
-            successCard.classList.remove('active');
-            renderGallery();
-        }
-
-        clearAllBtn.addEventListener('click', clearAllImages);
-        clearAllTopBtn.addEventListener('click', clearAllImages);
-
-        sortNameBtn.addEventListener('click', () => {
-            imageList.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
-            renderGallery();
-        });
-
-        reverseBtn.addEventListener('click', () => {
-            imageList.reverse();
-            renderGallery();
-        });
-
-        rotateAllBtn.addEventListener('click', () => {
-            imageList.forEach(item => {
-                item.rotation = (item.rotation + 90) % 360;
-            });
-            renderGallery();
-        });
-
-        // Image loader helper
-        function loadImageElement(src) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => resolve(img);
-                img.onerror = () => reject(new Error('Failed to load image: ' + src));
-                img.src = src;
-            });
-        }
-
-        // PDF Generation Workflow
-        generatePdfBtn.addEventListener('click', async function () {
-            if (imageList.length === 0 || isProcessing) return;
-
-            isProcessing = true;
-            generatePdfBtn.disabled = true;
-            clearAllBtn.disabled = true;
-            successCard.classList.remove('active');
-
-            // Open Progress Modal
-            progressModal.classList.add('active');
-            progressBarFill.style.width = '0%';
-            progressStatusText.textContent = `Preparing document...`;
-
-            try {
-                const { jsPDF } = window.jspdf;
-                if (!jsPDF) {
-                    throw new Error('jsPDF library could not be loaded.');
-                }
-
-                const pageSize = document.getElementById('pageSize').value;
-                const orientationMode = document.getElementById('orientation').value;
-                const margin = Number(document.getElementById('marginPreset').value);
-                const layoutMode = document.getElementById('layoutMode').value;
-                const quality = Number(document.getElementById('quality').value);
-                const addPageNumbers = document.getElementById('addPageNumbers').checked;
-                let customName = document.getElementById('pdfFileName').value.trim();
-                if (!customName.toLowerCase().endsWith('.pdf')) {
-                    customName += '.pdf';
-                }
-
-                // Standard Dimension Table in mm (Width x Height in Portrait)
-                const PAGE_SIZES = {
-                    a4: [210, 297],
-                    letter: [215.9, 279.4],
-                    legal: [215.9, 355.6],
-                    a3: [297, 420],
-                    a5: [148, 210]
-                };
-
-                let pdf = null;
-                const totalPages = imageList.length;
-
-                for (let i = 0; i < totalPages; i++) {
-                    const item = imageList[i];
-                    const percent = Math.round(((i) / totalPages) * 100);
-                    progressBarFill.style.width = `${percent}%`;
-                    progressStatusText.textContent = `Processing image ${i + 1} of ${totalPages}...`;
-                    progressSubtext.textContent = `${item.name}`;
-
-                    // Yield to browser UI thread to keep animations ultra smooth
-                    await new Promise(r => setTimeout(r, 20));
-
-                    // Load Image
-                    const rawImg = await loadImageElement(item.previewUrl);
-
-                    // Offscreen Canvas for Rotation and Compression
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-
-                    const is90or270 = item.rotation === 90 || item.rotation === 270;
-                    const naturalWidth = is90or270 ? rawImg.naturalHeight : rawImg.naturalWidth;
-                    const naturalHeight = is90or270 ? rawImg.naturalWidth : rawImg.naturalHeight;
-
-                    // Cap maximum canvas dimension to avoid mobile browser memory limits (max 3840px)
-                    const maxDim = 3840;
-                    let targetW = naturalWidth;
-                    let targetH = naturalHeight;
-                    if (targetW > maxDim || targetH > maxDim) {
-                        if (targetW > targetH) {
-                            targetH = Math.round((targetH * maxDim) / targetW);
-                            targetW = maxDim;
-                        } else {
-                            targetW = Math.round((targetW * maxDim) / targetH);
-                            targetH = maxDim;
-                        }
-                    }
-
-                    canvas.width = targetW;
-                    canvas.height = targetH;
-
-                    ctx.save();
-                    ctx.translate(canvas.width / 2, canvas.height / 2);
-                    ctx.rotate((item.rotation * Math.PI) / 180);
-                    
-                    const drawW = is90or270 ? targetH : targetW;
-                    const drawH = is90or270 ? targetW : targetH;
-                    ctx.drawImage(rawImg, -drawW / 2, -drawH / 2, drawW, drawH);
-                    ctx.restore();
-
-                    // Convert to high efficiency JPEG
-                    const processedDataUrl = canvas.toDataURL('image/jpeg', quality);
-
-                    // Clean canvas memory
-                    canvas.width = 0;
-                    canvas.height = 0;
-
-                    // Compute Page Dimensions
-                    let pageW, pageH;
-                    let pageOrientation = 'portrait';
-
-                    if (pageSize === 'fit') {
-                        // Dynamic page size matching image aspect ratio
-                        const pxToMm = 0.264583;
-                        pageW = targetW * pxToMm;
-                        pageH = targetH * pxToMm;
-                        pageOrientation = pageW > pageH ? 'landscape' : 'portrait';
-                    } else {
-                        const standardDim = PAGE_SIZES[pageSize] || PAGE_SIZES.a4;
-                        const isImageLandscape = targetW > targetH;
-
-                        if (orientationMode === 'auto') {
-                            pageOrientation = isImageLandscape ? 'landscape' : 'portrait';
-                        } else {
-                            pageOrientation = orientationMode;
-                        }
-
-                        if (pageOrientation === 'landscape') {
-                            pageW = Math.max(standardDim[0], standardDim[1]);
-                            pageH = Math.min(standardDim[0], standardDim[1]);
-                        } else {
-                            pageW = Math.min(standardDim[0], standardDim[1]);
-                            pageH = Math.max(standardDim[0], standardDim[1]);
-                        }
-                    }
-
-                    // Initialize or add page to jsPDF
-                    if (i === 0) {
-                        pdf = new jsPDF({
-                            orientation: pageOrientation,
-                            unit: 'mm',
-                            format: pageSize === 'fit' ? [pageW, pageH] : pageSize,
-                            compress: true
-                        });
-                    } else {
-                        pdf.addPage(pageSize === 'fit' ? [pageW, pageH] : pageSize, pageOrientation);
-                    }
-
-                    // Calculate Scaled Image Rectangle
-                    const availW = Math.max(10, pageW - (margin * 2));
-                    const availH = Math.max(10, pageH - (margin * 2));
-
-                    const imgRatio = targetW / targetH;
-                    const availRatio = availW / availH;
-
-                    let finalW, finalH;
-
-                    if (layoutMode === 'cover') {
-                        if (imgRatio > availRatio) {
-                            finalH = availH;
-                            finalW = finalH * imgRatio;
-                        } else {
-                            finalW = availW;
-                            finalH = finalW / imgRatio;
-                        }
-                    } else {
-                        // Contain (fit within available area)
-                        if (imgRatio > availRatio) {
-                            finalW = availW;
-                            finalH = finalW / imgRatio;
-                        } else {
-                            finalH = availH;
-                            finalW = finalH * imgRatio;
-                        }
-                    }
-
-                    const posX = (pageW - finalW) / 2;
-                    const posY = (pageH - finalH) / 2;
-
-                    pdf.addImage(processedDataUrl, 'JPEG', posX, posY, finalW, finalH, undefined, 'FAST');
-
-                    // Optional Page Number Footer
-                    if (addPageNumbers && pageSize !== 'fit') {
-                        pdf.setFontSize(9);
-                        pdf.setTextColor(120, 120, 120);
-                        const footerText = `${i + 1} / ${totalPages}`;
-                        pdf.text(footerText, pageW / 2, pageH - Math.max(3, margin / 2), { align: 'center' });
-                    }
-                }
-
-                // Finalize Progress
-                progressBarFill.style.width = '100%';
-                progressStatusText.textContent = `Saving PDF file...`;
-
-                await new Promise(r => setTimeout(r, 100));
-
-                // Generate Blob for download and preview
-                const pdfBlob = pdf.output('blob');
-                lastGeneratedPdfBlob = pdfBlob;
-                lastGeneratedPdfName = customName;
-
-                // Trigger direct download
-                pdf.save(customName);
-
-                // Show Success Banner with file size and link
-                const pdfUrl = URL.createObjectURL(pdfBlob);
-                downloadAgainBtn.href = pdfUrl;
-                downloadAgainBtn.download = customName;
-                successDetails.textContent = `${totalPages} page${totalPages !== 1 ? 's' : ''} • ${formatBytes(pdfBlob.size)} • "${customName}"`;
-                successCard.classList.add('active');
-
-                // Smooth scroll to success card
-                successCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-            } catch (err) {
-                console.error('PDF Generation Error:', err);
-                alert('Error creating PDF: ' + (err.message || 'Unknown error occurred.'));
-            } finally {
-                progressModal.classList.remove('active');
-                isProcessing = false;
-                generatePdfBtn.disabled = imageList.length === 0;
-                clearAllBtn.disabled = imageList.length === 0;
-            }
-        });
-
-    })();
-</script>
-
-</body>
-</html>
+<body><div style="padding: 24px; font-family: var(--font-mono);">~/ghost/image-to-pdf</div></body></html>
