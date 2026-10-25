@@ -6,12 +6,20 @@ export const Footer: React.FC = () => {
     <footer className="app-footer">
       <div className="footer-inner">
         <div className="footer-mono-meta">
-          <span className="live-status-dot" aria-hidden="true"></span>
-          <span>image_to_pdf</span>
-          <span className="footer-sep">·</span>
-          <span>100% browser memory</span>
-          <span className="footer-sep">·</span>
-          <span>zero server telemetry</span>
+          <div className="footer-meta-brand">
+            <span className="live-status-dot" aria-hidden="true"></span>
+            <span className="footer-meta-title">image_to_pdf</span>
+          </div>
+          <span className="footer-sep" aria-hidden="true">·</span>
+          <span className="footer-meta-item">
+            <span className="footer-sub-prefix" aria-hidden="true">↳</span>
+            <span>100% browser memory</span>
+          </span>
+          <span className="footer-sep" aria-hidden="true">·</span>
+          <span className="footer-meta-item">
+            <span className="footer-sub-prefix" aria-hidden="true">↳</span>
+            <span>zero server telemetry</span>
+          </span>
         </div>
 
         <div className="footer-links-row">
@@ -23,7 +31,7 @@ export const Footer: React.FC = () => {
           >
             source ↗
           </a>
-          <span className="footer-sep">·</span>
+          <span className="footer-sep" aria-hidden="true">·</span>
           <a
             href="https://github.com/harik90/IMAGE_TO_PDF/issues"
             target="_blank"
@@ -32,7 +40,7 @@ export const Footer: React.FC = () => {
           >
             report issue ↗
           </a>
-          <span className="footer-sep">·</span>
+          <span className="footer-sep" aria-hidden="true">·</span>
           <Link to="/" className="footer-craft-link">
             all tools
           </Link>
