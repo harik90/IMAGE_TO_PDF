@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-const REPO_URL = 'https://github.com/harik90/IMAGE_TO_PDF';
-const API_URL = 'https://api.github.com/repos/harik90/IMAGE_TO_PDF';
-const CACHE_KEY = 'image_to_pdf_stars';
-const CACHE_TS_KEY = 'image_to_pdf_stars_ts';
+export interface GitHubStarConfig {
+  owner?: string;
+  repo?: string;
+  pollIntervalMs?: number;
+}
 
 export function formatStarCount(count: number): string {
   if (count >= 1000000) return (count / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
@@ -11,10 +12,26 @@ export function formatStarCount(count: number): string {
   return count.toString();
 }
 
-export function useGitHubStars() {
+function parseShieldsValue(raw: any): number | null {
+  if (!raw) return null;
+  if (typeof raw === 'number') return raw;
+  const s = String(raw).trim().toLowerCase();
+  if (s.endsWith('m')) return Math.round(parseFloat(s) * 1000000);
+  if (s.endsWith('k')) return Math.round(parseFloat(s) * 1000);
+  const n = parseInt(s, 10);
+  return isNaN(n) ? null : n;
+}
+
+export function useGitHubStars(config?: GitHubStarConfig) {
+  const owner = config?.owner || 'harik90';
+  const repo = config?.repo || 'IMAGE_TO_PDF';
+  const pollInterval = config?.pollIntervalMs || 20000; // 20s auto-refresh
+  const cacheKey = `gh_stars_${repo}`;
+
   const [stars, setStars] = useState<number | null>(() => {
+    if (typeof window === 'undefined') return 2;
     try {
-      const cached = localStorage.getItem(CACHE_KEY);
+      const cached = localStorage.getItem(cacheKey);
       return cached !== null ? parseInt(cached, 10) : 2;
     } catch {
       return 2;
@@ -26,54 +43,78 @@ export function useGitHubStars() {
   const lastFetchedRef = useRef<number>(0);
 
   const fetchLiveStars = useCallback(async () => {
+    // Throttle focus fetches to at most once per 4 seconds
     const now = Date.now();
-    // Throttle focus fetches to at most once per 6 seconds to respect rate limits
-    if (now - lastFetchedRef.current < 6000) return;
+    if (now - lastFetchedRef.current < 4000) return;
     lastFetchedRef.current = now;
 
     setIsLoading(true);
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 6000);
+    let resolvedCount: number | null = null;
 
+    // 1. Primary Source: Official GitHub API
     try {
-      const res = await fetch(API_URL, {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      const res = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
         signal: controller.signal,
-        headers: {
-          'Accept': 'application/vnd.github.v3+json'
-        }
+        headers: { Accept: 'application/vnd.github.v3+json' }
       });
-      if (!res.ok) return;
+      clearTimeout(timeout);
 
-      const data = await res.json();
-      if (typeof data.stargazers_count === 'number') {
-        setStars(prev => {
-          if (prev !== null && prev !== data.stargazers_count) {
-            setHasUpdated(true);
-            setTimeout(() => setHasUpdated(false), 2400);
-          }
-          return data.stargazers_count;
-        });
-
-        try {
-          localStorage.setItem(CACHE_KEY, data.stargazers_count.toString());
-          localStorage.setItem(CACHE_TS_KEY, Date.now().toString());
-        } catch {}
+      if (res.ok) {
+        const data = await res.json();
+        if (typeof data.stargazers_count === 'number') {
+          resolvedCount = data.stargazers_count;
+        }
       }
     } catch {
-      // Gracefully preserve cached value without throwing or flashing UI
-    } finally {
-      setIsLoading(false);
-      clearTimeout(timeout);
+      // Primary fetch failed or timed out; proceed to fallback
     }
-  }, []);
+
+    // 2. Fallback Source: Shields.io (Anti Rate-Limit)
+    if (resolvedCount === null) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
+        const res = await fetch(`https://img.shields.io/github/stars/${owner}/${repo}.json`, {
+          signal: controller.signal
+        });
+        clearTimeout(timeout);
+
+        if (res.ok) {
+          const data = await res.json();
+          resolvedCount = parseShieldsValue(data.value || data.message);
+        }
+      } catch {
+        // Fallback fetch failed
+      }
+    }
+
+    // 3. Update state & persist to LocalStorage
+    if (resolvedCount !== null) {
+      setStars(prev => {
+        if (prev !== null && prev !== resolvedCount) {
+          setHasUpdated(true);
+          setTimeout(() => setHasUpdated(false), 2000);
+        }
+        return resolvedCount;
+      });
+
+      try {
+        localStorage.setItem(cacheKey, resolvedCount.toString());
+      } catch {}
+    }
+
+    setIsLoading(false);
+  }, [owner, repo, cacheKey]);
 
   useEffect(() => {
     fetchLiveStars();
 
-    // 1. Periodic realtime polling every 30 seconds
-    const interval = setInterval(fetchLiveStars, 30000);
+    // 1. Poll every 20 seconds
+    const interval = setInterval(fetchLiveStars, pollInterval);
 
-    // 2. Realtime wakeup on window focus (e.g. when user stars on GitHub and comes back)
+    // 2. Refresh immediately on window focus & tab visibility
     const handleFocus = () => fetchLiveStars();
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') fetchLiveStars();
@@ -87,7 +128,9 @@ export function useGitHubStars() {
       window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [fetchLiveStars]);
+  }, [fetchLiveStars, pollInterval]);
 
-  return { stars, repoUrl: REPO_URL, isLoading, hasUpdated };
+  const repoUrl = `https://github.com/${owner}/${repo}`;
+
+  return { stars, repoUrl, isLoading, hasUpdated };
 }
