@@ -22,23 +22,19 @@
   --border-dashed: rgba(255, 255, 255, 0.16);
   --border-focus: rgba(61, 220, 151, 0.6);
 
-  /* Three Distinct Card Colors */
   --amber-bg: rgba(130, 98, 40, 0.18);
   --amber-border: rgba(235, 190, 100, 0.22);
   --amber-text: #FBEFD3;
-  --amber-accent: #E5B25D;
 
   --indigo-bg: rgba(70, 60, 150, 0.20);
   --indigo-border: rgba(160, 150, 255, 0.22);
   --indigo-text: #E6E3FF;
-  --indigo-accent: #A59BFF;
 
   --green-bg: rgba(40, 90, 70, 0.20);
   --green-border: rgba(130, 215, 170, 0.20);
   --green-text: #DDF6E8;
   --green-accent: #3ddc97;
 
-  /* Mint Green Primary */
   --mint-primary: #3ddc97;
   --mint-hover: #32c484;
   --mint-glow: rgba(61, 220, 151, 0.25);
@@ -206,6 +202,41 @@ a {
   gap: 32px;
 }
 
+/* Hero Section */
+.home-hero {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.home-hero-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.home-hero-crumbs .accent {
+  color: var(--mint-primary);
+}
+
+.home-hero-title {
+  font-size: 34px;
+  max-width: 720px;
+  line-height: 1.25;
+}
+
+.home-hero-desc {
+  color: var(--text-secondary);
+  font-size: 14px;
+  max-width: 580px;
+  line-height: 1.6;
+}
+
 /* Typography styles */
 h1, h2, h3, h4 {
   font-family: var(--font-sans);
@@ -234,7 +265,6 @@ h1, h2, h3, h4 {
   grid-column: 1 / -1;
 }
 
-/* Cards with ~0.5deg Rotation and Large 22px Radius */
 .craft-card {
   border-radius: var(--radius-card);
   padding: 24px;
@@ -356,7 +386,7 @@ h1, h2, h3, h4 {
   opacity: 0.75;
 }
 
-/* Controls inside Cards */
+/* Controls */
 .control-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -401,7 +431,7 @@ h1, h2, h3, h4 {
   color: var(--text-primary);
 }
 
-/* Stats Row inside Output Card */
+/* Stats Row */
 .stats-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -436,7 +466,7 @@ h1, h2, h3, h4 {
   text-overflow: ellipsis;
 }
 
-/* Dashed Status Box */
+/* Status Box */
 .status-box {
   background: var(--surface-well);
   border: 1px dashed var(--green-accent);
@@ -460,7 +490,7 @@ h1, h2, h3, h4 {
   border-color: var(--mint-primary);
 }
 
-/* Mint Green Primary Button */
+/* Action Buttons */
 .btn-primary-mint {
   background: var(--mint-primary);
   color: #0c0e0d;
@@ -492,7 +522,6 @@ h1, h2, h3, h4 {
   box-shadow: none;
 }
 
-/* Secondary Button */
 .btn-secondary {
   background: var(--surface-well);
   color: currentColor;
@@ -518,7 +547,7 @@ h1, h2, h3, h4 {
   cursor: not-allowed;
 }
 
-/* Home Screen Tool Cards Grid (3 col desktop, 2 col tablet, 1 col mobile) */
+/* Home Grid */
 .home-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -585,7 +614,7 @@ h1, h2, h3, h4 {
   color: var(--text-muted);
 }
 
-/* Search Bar (Home and Header) */
+/* Search Bar */
 .search-bar-wrap {
   position: relative;
   width: 100%;
@@ -662,6 +691,121 @@ h1, h2, h3, h4 {
   background: var(--surface-well);
   object-fit: cover;
   flex-shrink: 0;
+}
+
+/* Command Palette Modal */
+.palette-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 80px 20px 20px;
+}
+
+.palette-window {
+  width: 100%;
+  max-width: 560px;
+  background: var(--surface-solid);
+  border: 1px solid var(--border-dashed);
+  border-radius: var(--radius-card);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.palette-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  gap: 12px;
+  border-bottom: 1px dashed var(--border-dim);
+}
+
+.palette-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.palette-list {
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.palette-item {
+  padding: 12px 14px;
+  border-radius: var(--radius-well);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: all 120ms ease;
+  border: 1px solid transparent;
+}
+
+.palette-item.active {
+  background: rgba(61, 220, 151, 0.12);
+  border-color: rgba(61, 220, 151, 0.3);
+}
+
+/* Tool Layout Helpers */
+.tool-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.tool-title {
+  font-size: 26px;
+  margin-bottom: 6px;
+}
+
+.tool-desc {
+  color: var(--text-secondary);
+  font-size: 14px;
+  max-width: 640px;
+}
+
+.tool-info-card {
+  margin-top: 12px;
+  padding: 20px;
+  background: var(--surface-well);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-well);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tool-info-heading {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.tool-info-body {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.6;
 }
 
 /* Footer */

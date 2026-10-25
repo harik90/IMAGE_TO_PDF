@@ -7,7 +7,6 @@ import { ToolDef } from '../types';
 export const HomePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Fuzzy filter
   function matchTool(tool: ToolDef, q: string): boolean {
     if (!q) return true;
     const cleanQ = q.toLowerCase().trim();
@@ -19,7 +18,6 @@ export const HomePage: React.FC = () => {
       return true;
     }
 
-    // Subsequence match
     let qIdx = 0;
     for (let i = 0; i < name.length && qIdx < cleanQ.length; i++) {
       if (name[i] === cleanQ[qIdx]) qIdx++;
@@ -31,26 +29,24 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="page-container">
-      {/* Hero Section */}
-      <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--mint-primary)' }}>~/shapedinto</span>
-          <span style={{ color: 'var(--text-muted)' }}>·</span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--text-muted)' }}>local file studio</span>
+      <section className="home-hero">
+        <div className="home-hero-crumbs">
+          <span className="accent">~/shapedinto</span>
+          <span>·</span>
+          <span>local file studio</span>
         </div>
 
-        <h1 style={{ fontSize: '36px', maxWidth: '720px', lineHeight: 1.25 }}>
+        <h1 className="home-hero-title">
           Private, fast, client-side file tools for images &amp; PDFs.
         </h1>
 
-        <p style={{ color: 'var(--text-secondary)', fontSize: '15px', maxWidth: '580px' }}>
+        <p className="home-hero-desc">
           All processing runs 100% inside your browser. No files are uploaded to any server, no trackers, no limits.
         </p>
 
         <PrivacyBadge style={{ marginTop: '4px' }} />
-      </div>
+      </section>
 
-      {/* Big Search Bar */}
       <div className="search-bar-wrap" style={{ maxWidth: '640px', margin: '0 auto', width: '100%' }}>
         <svg
           className="search-icon-pos"
@@ -78,7 +74,6 @@ export const HomePage: React.FC = () => {
         <span className="search-kbd-hint">⌘K</span>
       </div>
 
-      {/* Grid of Tools (3 cols desktop, 2 col tablet, 1 col mobile) */}
       {filteredTools.length === 0 ? (
         <div
           style={{
@@ -105,7 +100,6 @@ export const HomePage: React.FC = () => {
       ) : (
         <div className="home-grid">
           {filteredTools.map((tool, index) => {
-            // Cycle through amber, indigo, green
             const colorClass = index % 3 === 0 ? 'card-amber' : index % 3 === 1 ? 'card-indigo' : 'card-green';
 
             return (

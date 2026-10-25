@@ -24,74 +24,46 @@ export const ToolLayout: React.FC<Props> = ({
 }) => {
   return (
     <div className="page-container">
-      {/* Top Tool Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+      <div className="tool-top-row">
         <div>
-          <h1 style={{ fontSize: '26px', marginBottom: '6px' }}>{title}</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', maxWidth: '640px' }}>
-            {description}
-          </p>
+          <h1 className="tool-title">{title}</h1>
+          <p className="tool-desc">{description}</p>
         </div>
         <PrivacyBadge />
       </div>
 
-      {/* 3-Card Tool Architecture Grid */}
       <div className="tool-grid">
-        {/* Amber Card (Import) */}
         <div className="craft-card card-amber">
           {amberCardContent}
         </div>
 
-        {/* Indigo Card (Settings) */}
         <div className="craft-card card-indigo">
           {indigoCardContent}
         </div>
 
-        {/* Green Card (Output & Stats) - spans both columns */}
         <div className="craft-card card-green tool-grid-full">
           {greenCardContent}
         </div>
       </div>
 
-      {/* File Sequence / List below cards */}
       {fileSequenceContent && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {fileSequenceContent}
         </div>
       )}
 
-      {/* How It Works & FAQ Box */}
       {(howItWorks || faq) && (
-        <div
-          style={{
-            marginTop: '12px',
-            padding: '20px',
-            background: 'var(--surface-well)',
-            border: '1px solid var(--border-dim)',
-            borderRadius: 'var(--radius-well)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px'
-          }}
-        >
+        <div className="tool-info-card">
           {howItWorks && (
             <div>
-              <div style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: '13px', color: 'var(--text-primary)', marginBottom: '4px' }}>
-                How it works
-              </div>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                {howItWorks}
-              </div>
+              <div className="tool-info-heading">How it works</div>
+              <div className="tool-info-body">{howItWorks}</div>
             </div>
           )}
           {faq && (
             <div style={{ borderTop: '1px dashed var(--border-dim)', paddingTop: '10px' }}>
-              <div style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: '13px', color: 'var(--text-primary)', marginBottom: '4px' }}>
-                FAQ & Security
-              </div>
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                {faq}
-              </div>
+              <div className="tool-info-heading">FAQ &amp; Security</div>
+              <div className="tool-info-body" style={{ color: 'var(--text-muted)' }}>{faq}</div>
             </div>
           )}
         </div>

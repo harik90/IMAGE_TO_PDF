@@ -1,19 +1,20 @@
 import React from 'react';
 import { ToolDef } from '../types';
-import { ImageToPdfTool } from './ImageToPdf';
-import { PdfToTextTool } from './PdfToText';
-import { ImageToTextTool } from './ImageToText';
-import { MergePdfTool } from './MergePdf';
-import { SplitPdfTool } from './SplitPdf';
-import { PdfToImageTool } from './PdfToImage';
-import { ImageConvertCompressTool } from './ImageConvertCompress';
-import { RotatePdfTool } from './RotatePdf';
-import { ReorderPdfTool } from './ReorderPdf';
-import { CompressPdfTool } from './CompressPdf';
-import { ResizeImageTool } from './ResizeImage';
-import { ImageToBase64Tool } from './ImageToBase64';
-import { TextToPdfTool } from './TextToPdf';
-import { PdfMetadataTool } from './PdfMetadata';
+
+const ImageToPdfTool = React.lazy(() => import('./ImageToPdf').then(m => ({ default: m.ImageToPdfTool })));
+const PdfToTextTool = React.lazy(() => import('./PdfToText').then(m => ({ default: m.PdfToTextTool })));
+const ImageToTextTool = React.lazy(() => import('./ImageToText').then(m => ({ default: m.ImageToTextTool })));
+const MergePdfTool = React.lazy(() => import('./MergePdf').then(m => ({ default: m.MergePdfTool })));
+const SplitPdfTool = React.lazy(() => import('./SplitPdf').then(m => ({ default: m.SplitPdfTool })));
+const PdfToImageTool = React.lazy(() => import('./PdfToImage').then(m => ({ default: m.PdfToImageTool })));
+const ImageConvertCompressTool = React.lazy(() => import('./ImageConvertCompress').then(m => ({ default: m.ImageConvertCompressTool })));
+const RotatePdfTool = React.lazy(() => import('./RotatePdf').then(m => ({ default: m.RotatePdfTool })));
+const ReorderPdfTool = React.lazy(() => import('./ReorderPdf').then(m => ({ default: m.ReorderPdfTool })));
+const CompressPdfTool = React.lazy(() => import('./CompressPdf').then(m => ({ default: m.CompressPdfTool })));
+const ResizeImageTool = React.lazy(() => import('./ResizeImage').then(m => ({ default: m.ResizeImageTool })));
+const ImageToBase64Tool = React.lazy(() => import('./ImageToBase64').then(m => ({ default: m.ImageToBase64Tool })));
+const TextToPdfTool = React.lazy(() => import('./TextToPdf').then(m => ({ default: m.TextToPdfTool })));
+const PdfMetadataTool = React.lazy(() => import('./PdfMetadata').then(m => ({ default: m.PdfMetadataTool })));
 
 export const toolsRegistry: ToolDef[] = [
   {
