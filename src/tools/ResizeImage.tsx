@@ -190,26 +190,29 @@ export const ResizeImageTool: React.FC = () => {
 
             {resizeMode === 'pct' ? (
               <div className="control-field">
-                <label className="control-label">scale ({percentage}%)</label>
+                <div className="slider-header-row">
+                  <label className="control-label">scale</label>
+                  <span className="slider-val-badge">{percentage}%</span>
+                </div>
                 <input
                   type="range"
+                  className="craft-slider"
                   min="5"
                   max="200"
                   step="5"
                   value={percentage}
                   onChange={e => handlePercentageChange(parseInt(e.target.value, 10))}
-                  style={{ accentColor: 'var(--mint-primary)', marginTop: '8px' }}
                   disabled={!file}
                 />
               </div>
             ) : (
               <div className="control-field" style={{ display: 'flex', alignItems: 'center', marginTop: '16px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', cursor: 'pointer' }}>
+                <label className="toggle-label-inline">
                   <input
                     type="checkbox"
                     checked={keepAspect}
                     onChange={e => setKeepAspect(e.target.checked)}
-                    style={{ accentColor: 'var(--mint-primary)' }}
+                    className="toggle-checkbox"
                   />
                   <span>Lock aspect ratio</span>
                 </label>

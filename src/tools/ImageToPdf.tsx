@@ -354,18 +354,18 @@ export const ImageToPdfTool: React.FC = () => {
               <input
                 type="text"
                 className="craft-input"
-                placeholder="John Doe"
+                placeholder="Your name"
                 value={authorName}
                 onChange={e => setAuthorName(e.target.value)}
               />
             </div>
 
-            <label style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '11px' }}>
+            <label className="toggle-label-inline" style={{ gridColumn: '1 / -1' }}>
               <input
                 type="checkbox"
                 checked={addPageNumbers}
                 onChange={e => setAddPageNumbers(e.target.checked)}
-                style={{ accentColor: 'var(--mint-primary)' }}
+                className="toggle-checkbox"
               />
               <span>Add page numbers in footer (e.g. Page 1 of 5)</span>
             </label>

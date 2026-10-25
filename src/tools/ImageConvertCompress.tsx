@@ -246,25 +246,28 @@ export const ImageConvertCompressTool: React.FC = () => {
             </div>
 
             <div className="control-field">
-              <label className="control-label">quality ({Math.round(quality * 100)}%)</label>
+              <div className="slider-header-row">
+                <label className="control-label">quality</label>
+                <span className="slider-val-badge">{Math.round(quality * 100)}%</span>
+              </div>
               <input
                 type="range"
+                className="craft-slider"
                 min="0.1"
                 max="1.0"
                 step="0.05"
                 value={quality}
                 onChange={e => setQuality(parseFloat(e.target.value))}
-                style={{ accentColor: 'var(--mint-primary)', marginTop: '8px' }}
                 disabled={targetFormat === 'image/png'}
               />
             </div>
 
-            <label style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '11px' }}>
+            <label className="toggle-label-inline" style={{ gridColumn: '1 / -1' }}>
               <input
                 type="checkbox"
                 checked={resizeEnabled}
                 onChange={e => setResizeEnabled(e.target.checked)}
-                style={{ accentColor: 'var(--mint-primary)' }}
+                className="toggle-checkbox"
               />
               <span>Cap maximum width (e.g. 1920px Full HD)</span>
             </label>
