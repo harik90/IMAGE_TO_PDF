@@ -3,17 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>shapedinto — 100% private, client-side file tools</title>
-  <meta name="description" content="fast, private, client-side image and pdf utilities. zero server uploads, zero telemetry, 100% in-browser processing.">
+  <title>shapedinto — private by design client-side tools</title>
+  <meta name="description" content="refined, private, client-side image and pdf utilities. zero server uploads, zero tracking.">
   <meta name="theme-color" content="#0c0e0d">
 
-  <!-- Strict Content Security Policy -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: data:; connect-src 'self' ws: wss: blob: data:; worker-src 'self' blob:; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
+  <!-- Content Security Policy: Self-hosted execution with GitHub Stars API connection only -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: data:; connect-src 'self' ws: wss: https://api.github.com blob: data:; worker-src 'self' blob:; script-src 'self' 'wasm-unsafe-eval' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
 
-  <!-- Fonts: Inter, JetBrains Mono, Caveat -->
+  <!-- Fonts: Inter and JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Instant Theme Initializer (prevents flash of unstyled theme) -->
+  <script>
+    (function() {
+      try {
+        var theme = localStorage.getItem('shapedinto_theme') || 'system';
+        var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <div id="root"></div>
