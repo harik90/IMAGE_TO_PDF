@@ -149,7 +149,7 @@ export const PdfMetadataTool: React.FC = () => {
                 className="craft-input"
                 value={author}
                 onChange={e => setAuthor(e.target.value)}
-                placeholder="Author Name"
+                placeholder="Your name"
                 disabled={!file}
               />
             </div>
