@@ -43,12 +43,16 @@ export async function extractTextFromPdfPage(pdfPage: any): Promise<string> {
   return lines.map(l => l.text.trim()).join('\n');
 }
 
-export async function renderPdfPageToCanvas(pdfPage: any, dpi = 300): Promise<HTMLCanvasElement> {
-  // 300 DPI standard: 300 / 72 ≈ 4.1667
-  let scale = dpi / 72;
+export async function renderPdfPageToCanvas(pdfPage: any, scaleOrDpi: number = 2.0): Promise<HTMLCanvasElement> {
+  // If scaleOrDpi > 10, treat as DPI (e.g. 150, 300 -> 300/72 = 4.167). Otherwise treat as direct scale factor (e.g. 1.0, 2.0, 3.0)
+  let scale = scaleOrDpi > 10 ? scaleOrDpi / 72 : scaleOrDpi;
+
+  // Ensure minimum scale of 1.0 so pages are never downsampled to microscopic blur
+  if (scale < 1.0) scale = 1.0;
+
   const initialViewport = pdfPage.getViewport({ scale });
 
-  // Cap maximum dimension to 4096px for mobile/browser memory protection
+  // Cap maximum dimension to 4096px for browser memory stability
   const maxDim = 4096;
   if (initialViewport.width > maxDim || initialViewport.height > maxDim) {
     const ratio = Math.min(maxDim / initialViewport.width, maxDim / initialViewport.height);
@@ -63,6 +67,7 @@ export async function renderPdfPageToCanvas(pdfPage: any, dpi = 300): Promise<HT
 
   if (!context) throw new Error('Could not get canvas 2D context');
 
+  // Fill canvas with white background for transparency
   context.fillStyle = '#ffffff';
   context.fillRect(0, 0, canvas.width, canvas.height);
 

@@ -65,9 +65,14 @@ export const CompressPdfTool: React.FC = () => {
         const page = await pdf.getPage(i);
         const canvas = await renderPdfPageToCanvas(page, scale);
 
-        const jpegDataUrl = canvas.toDataURL('image/jpeg', quality);
-        const res = await fetch(jpegDataUrl);
-        const jpegBytes = await res.arrayBuffer();
+        const jpegBlob: Blob = await new Promise((resolve, reject) => {
+          canvas.toBlob(
+            b => (b ? resolve(b) : reject(new Error('Failed to encode canvas to jpeg'))),
+            'image/jpeg',
+            quality
+          );
+        });
+        const jpegBytes = await jpegBlob.arrayBuffer();
         const embedded = await outDoc.embedJpg(jpegBytes);
 
         const viewport = page.getViewport({ scale: 1.0 });
