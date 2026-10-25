@@ -1,8 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { toolsRegistry } from '../tools/registry';
-import { Search, ChevronDown } from 'lucide-react';
-import { MoreMenu } from './MoreMenu';
+import { Search } from 'lucide-react';
 import { GitHubStarButton } from './GitHubStarButton';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -13,8 +12,6 @@ interface Props {
 export const Header: React.FC<Props> = ({ onOpenSearch }) => {
   const location = useLocation();
   const currentTool = toolsRegistry.find(t => t.route === location.pathname);
-  const [isMoreOpen, setIsMoreOpen] = useState(false);
-  const moreTriggerRef = useRef<HTMLButtonElement>(null);
 
   return (
     <header className="app-header">
@@ -43,20 +40,7 @@ export const Header: React.FC<Props> = ({ onOpenSearch }) => {
             tools
           </Link>
 
-          {/* 2. More ▾ */}
-          <button
-            ref={moreTriggerRef}
-            type="button"
-            className={`nav-more-btn ${isMoreOpen ? 'active' : ''}`}
-            onClick={() => setIsMoreOpen(prev => !prev)}
-            aria-expanded={isMoreOpen}
-            aria-label="More tools menu"
-          >
-            <span>more</span>
-            <ChevronDown size={13} className={`chevron-icon ${isMoreOpen ? 'open' : ''}`} />
-          </button>
-
-          {/* 3. Search */}
+          {/* 2. Search */}
           <button
             type="button"
             onClick={onOpenSearch}
@@ -68,19 +52,13 @@ export const Header: React.FC<Props> = ({ onOpenSearch }) => {
             <kbd className="search-shortcut">⌘K</kbd>
           </button>
 
-          {/* 4. Live GitHub Star Button */}
+          {/* 3. Live GitHub Star Button */}
           <GitHubStarButton />
 
-          {/* 5. Theme Toggle */}
+          {/* 4. Theme Toggle */}
           <ThemeToggle />
         </nav>
       </div>
-
-      <MoreMenu
-        isOpen={isMoreOpen}
-        onClose={() => setIsMoreOpen(false)}
-        triggerRef={moreTriggerRef}
-      />
     </header>
   );
 };
