@@ -1,3 +1,7 @@
+# Dependencies & build
+node_modules/
+dist/
+
 # Ignore personal document files
 *.jpg
 *.jpeg
