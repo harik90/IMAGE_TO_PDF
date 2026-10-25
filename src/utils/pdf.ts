@@ -1,7 +1,8 @@
 import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 if (typeof window !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.mjs';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 }
 
 export async function loadPdfDocument(file: File) {
@@ -13,7 +14,11 @@ export async function loadPdfDocument(file: File) {
     });
     return await loadingTask.promise;
   } catch (err: any) {
-    throw new Error('This PDF is locked or damaged. Remove the password and try again.');
+    console.error('PDF parsing error:', err);
+    if (err?.name === 'PasswordException' || err?.message?.toLowerCase().includes('password')) {
+      throw new Error('This PDF is password-protected. Please unlock or decrypt it first.');
+    }
+    throw new Error(err?.message || 'Unable to open this PDF document.');
   }
 }
 

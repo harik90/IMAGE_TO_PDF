@@ -1,25 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ToolLayout } from '../components/ToolLayout';
 import { Dropzone } from '../components/Dropzone';
-import { formatBytes, validateFileSize, validateFileType, downloadBlob, downloadZip } from '../utils/file';
+import { formatBytes, validateFileSize, validateFileType, downloadBlob, revokeUrl } from '../utils/file';
 import { loadPdfDocument, renderPdfPageToCanvas } from '../utils/pdf';
-import { Image, Sliders, Play, FileDown } from 'lucide-react';
+import { Image, Sliders, Play, FileDown, CheckCircle2 } from 'lucide-react';
+import { zipSync } from 'fflate';
+
+function parsePageRange(rangeStr: string, maxPages: number): number[] {
+  if (!rangeStr.trim()) return Array.from({ length: maxPages }, (_, i) => i + 1);
+  const pages = new Set<number>();
+  const parts = rangeStr.split(',');
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (trimmed.includes('-')) {
+      const [startStr, endStr] = trimmed.split('-');
+      const start = parseInt(startStr, 10);
+      const end = parseInt(endStr, 10);
+      if (!isNaN(start) && !isNaN(end)) {
+        for (let i = Math.max(1, start); i <= Math.min(maxPages, end); i++) {
+          pages.add(i);
+        }
+      }
+    } else {
+      const p = parseInt(trimmed, 10);
+      if (!isNaN(p) && p >= 1 && p <= maxPages) {
+        pages.add(p);
+      }
+    }
+  }
+  const result = Array.from(pages).sort((a, b) => a - b);
+  return result.length > 0 ? result : Array.from({ length: maxPages }, (_, i) => i + 1);
+}
 
 export const PdfToImageTool: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [totalPages, setTotalPages] = useState<number>(0);
-  const [format, setFormat] = useState<'png' | 'jpeg'>('png');
+  const [format, setFormat] = useState<'png' | 'jpeg' | 'webp'>('png');
   const [scale, setScale] = useState<number>(2.0);
   const [quality, setQuality] = useState<number>(0.92);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [pageMode, setPageMode] = useState<'all' | 'custom'>('all');
+  const [customPages, setCustomPages] = useState<string>('');
 
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [status, setStatus] = useState<string>('Select a PDF to convert pages to crisp images');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [downloadInfo, setDownloadInfo] = useState<{ url: string; filename: string; size: number } | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) revokeUrl(previewUrl);
+      if (downloadInfo?.url) revokeUrl(downloadInfo.url);
+    };
+  }, [previewUrl, downloadInfo]);
 
   const handleFileSelected = async (selectedFiles: FileList | File[]) => {
     setErrorMessage(null);
+    if (downloadInfo?.url) {
+      revokeUrl(downloadInfo.url);
+      setDownloadInfo(null);
+    }
+
     const chosen = selectedFiles[0];
     if (!chosen) return;
 
@@ -36,18 +78,24 @@ export const PdfToImageTool: React.FC = () => {
     }
 
     try {
-      setStatus(`Loading "${chosen.name}"...`);
+      setStatus(`Reading "${chosen.name}"...`);
       const pdf = await loadPdfDocument(chosen);
       setFile(chosen);
       setTotalPages(pdf.numPages);
-      setStatus(`Loaded "${chosen.name}" (${pdf.numPages} pages)`);
+      setStatus(`Loaded "${chosen.name}" (${pdf.numPages} page${pdf.numPages > 1 ? 's' : ''})`);
 
-      // Generate sharp page 1 preview
-      const firstPage = await pdf.getPage(1);
-      const previewCanvas = await renderPdfPageToCanvas(firstPage, 1.5);
-      setPreviewUrl(previewCanvas.toDataURL('image/jpeg', 0.88));
-    } catch {
-      setErrorMessage('This PDF is locked or damaged. Remove the password and try again.');
+      try {
+        const firstPage = await pdf.getPage(1);
+        const previewCanvas = await renderPdfPageToCanvas(firstPage, 1.0);
+        const url = previewCanvas.toDataURL('image/jpeg', 0.85);
+        if (previewUrl) revokeUrl(previewUrl);
+        setPreviewUrl(url);
+      } catch (previewErr) {
+        console.warn('Page preview skipped:', previewErr);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setErrorMessage(err?.message || 'Failed to read PDF. Verify the file is not corrupted.');
     }
   };
 
@@ -55,59 +103,90 @@ export const PdfToImageTool: React.FC = () => {
     if (!file || isProcessing) return;
     setIsProcessing(true);
     setErrorMessage(null);
+    if (downloadInfo?.url) {
+      revokeUrl(downloadInfo.url);
+      setDownloadInfo(null);
+    }
     setStatus('Loading PDF pages into renderer...');
     setProgress(5);
 
     try {
       const pdf = await loadPdfDocument(file);
-      const count = pdf.numPages;
+      const targetPages = pageMode === 'custom' && customPages.trim()
+        ? parsePageRange(customPages, pdf.numPages)
+        : Array.from({ length: pdf.numPages }, (_, i) => i + 1);
+
+      if (targetPages.length === 0) {
+        throw new Error('No valid pages selected for conversion.');
+      }
+
+      const totalTarget = targetPages.length;
       const imagesMap: Record<string, Uint8Array> = {};
+      const mime = format === 'png' ? 'image/png' : format === 'webp' ? 'image/webp' : 'image/jpeg';
+      const ext = format === 'png' ? 'png' : format === 'webp' ? 'webp' : 'jpg';
+      const baseDocName = file.name.replace(/\.pdf$/i, '');
 
-      for (let i = 1; i <= count; i++) {
-        setStatus(`Rendering page ${i} of ${count} at ${scale}x scale (high-res)...`);
-        setProgress(Math.round((i / count) * 85));
+      let singleBlob: Blob | null = null;
+      let singleFileName = '';
 
-        const page = await pdf.getPage(i);
+      for (let idx = 0; idx < totalTarget; idx++) {
+        const pageNum = targetPages[idx];
+        setStatus(`Rendering page ${pageNum} (${idx + 1} of ${totalTarget}) at ${scale}x scale...`);
+        setProgress(Math.round(((idx + 1) / totalTarget) * 88));
+
+        const page = await pdf.getPage(pageNum);
         const canvas = await renderPdfPageToCanvas(page, scale);
 
-        const mime = format === 'png' ? 'image/png' : 'image/jpeg';
         const pageBlob: Blob = await new Promise((resolve, reject) => {
           canvas.toBlob(
-            b => (b ? resolve(b) : reject(new Error('Failed to encode page canvas to image blob'))),
+            b => (b ? resolve(b) : reject(new Error(`Failed to encode page ${pageNum} to image`))),
             mime,
             quality
           );
         });
-        const buffer = await pageBlob.arrayBuffer();
-        const ext = format === 'png' ? 'png' : 'jpg';
-        const pageFileName = `page-${String(i).padStart(3, '0')}.${ext}`;
 
-        imagesMap[pageFileName] = new Uint8Array(buffer);
+        const pageFileName = `${baseDocName}-page-${String(pageNum).padStart(3, '0')}.${ext}`;
 
-        // Memory cleanup
+        if (totalTarget === 1) {
+          singleBlob = pageBlob;
+          singleFileName = pageFileName;
+        } else {
+          const buffer = await pageBlob.arrayBuffer();
+          imagesMap[`page-${String(pageNum).padStart(3, '0')}.${ext}`] = new Uint8Array(buffer);
+        }
+
+        // Clean canvas bitmap memory
         canvas.width = 0;
         canvas.height = 0;
       }
 
-      setStatus('Packaging images...');
+      setStatus('Packaging image output...');
       setProgress(95);
 
-      if (count === 1) {
-        // Single page direct download
-        const singleKey = Object.keys(imagesMap)[0];
-        const blob = new Blob([imagesMap[singleKey] as any], { type: format === 'png' ? 'image/png' : 'image/jpeg' });
-        downloadBlob(blob, `${file.name.replace(/\.pdf$/i, '')}-${singleKey}`);
-        setStatus(`Downloaded 1 high-resolution page image (${formatBytes(blob.size)})`);
+      let finalBlob: Blob;
+      let finalName: string;
+
+      if (totalTarget === 1 && singleBlob) {
+        finalBlob = singleBlob;
+        finalName = singleFileName;
       } else {
-        // Zip archive for multi-page
-        const zipName = `${file.name.replace(/\.pdf$/i, '')}-images.zip`;
-        await downloadZip(imagesMap, zipName);
-        setStatus(`Success! Downloaded ${count} high-resolution page images in ${zipName}`);
+        finalName = `${baseDocName}-images.zip`;
+        const zipped = zipSync(imagesMap);
+        finalBlob = new Blob([zipped as any], { type: 'application/zip' });
       }
+
+      // Trigger automatic download
+      downloadBlob(finalBlob, finalName);
+
+      // Keep clickable re-download URL available
+      const url = URL.createObjectURL(finalBlob);
+      setDownloadInfo({ url, filename: finalName, size: finalBlob.size });
+
       setProgress(100);
+      setStatus(`Success! Exported ${totalTarget} image${totalTarget > 1 ? 's' : ''} (${formatBytes(finalBlob.size)})`);
     } catch (err: any) {
       console.error(err);
-      setErrorMessage(err.message || 'Failed to convert PDF pages to images');
+      setErrorMessage(err?.message || 'Failed to convert PDF pages to images');
       setStatus('Conversion failed');
     } finally {
       setIsProcessing(false);
@@ -115,19 +194,26 @@ export const PdfToImageTool: React.FC = () => {
   };
 
   const handleClear = () => {
+    if (previewUrl) revokeUrl(previewUrl);
+    if (downloadInfo?.url) revokeUrl(downloadInfo.url);
     setFile(null);
     setTotalPages(0);
     setPreviewUrl(null);
     setErrorMessage(null);
+    setDownloadInfo(null);
     setStatus('Select a PDF to convert pages to crisp images');
     setProgress(0);
   };
 
+  const activePagesCount = pageMode === 'custom' && customPages.trim()
+    ? parsePageRange(customPages, totalPages).length
+    : totalPages;
+
   return (
     <ToolLayout
       title="PDF to Image (High Resolution)"
-      description="Convert PDF document pages into crisp, high-resolution PNG or JPG image files with custom scale and lossless rendering."
-      howItWorks="Renders vector PDF coordinates directly onto an HTML5 canvas at high DPI (up to 4.0x scale / 300 DPI) using pdfjs-dist. Transparency is backed with pure white and exported as PNG or high-quality JPEG."
+      description="Convert PDF document pages into crisp, high-resolution PNG, JPG, or WebP image files with custom scale and lossless rendering."
+      howItWorks="Renders vector PDF coordinates directly onto an HTML5 canvas at high DPI (up to 4.0x scale / 300 DPI) using bundled pdfjs-dist. Transparency is backed with pure white and exported without server transmission."
       faq="All conversions happen 100% inside your browser memory. No pages are sent to any cloud server."
       amberCardContent={
         <>
@@ -146,12 +232,12 @@ export const PdfToImageTool: React.FC = () => {
             multiple={false}
             onFilesSelected={handleFileSelected}
             title={file ? file.name : 'Select PDF or drop here'}
-            subtitle={file ? `${totalPages} pages · ${formatBytes(file.size)}` : 'Single PDF up to 100MB'}
+            subtitle={file ? `${totalPages} page${totalPages > 1 ? 's' : ''} · ${formatBytes(file.size)}` : 'Single PDF up to 100MB'}
           />
 
           {file && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
+              <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
                 {file.name} ({totalPages} pages)
               </span>
               <button
@@ -186,7 +272,7 @@ export const PdfToImageTool: React.FC = () => {
               </span>
               image options
             </span>
-            <span className="handwritten-hint">(format &amp; scale)</span>
+            <span className="handwritten-hint">(format, scale &amp; pages)</span>
           </div>
 
           <div className="control-grid">
@@ -195,6 +281,7 @@ export const PdfToImageTool: React.FC = () => {
               <select className="craft-select" value={format} onChange={e => setFormat(e.target.value as any)}>
                 <option value="png">PNG (Lossless &amp; Sharp)</option>
                 <option value="jpeg">JPEG (Compressed)</option>
+                <option value="webp">WebP (Modern Compact)</option>
               </select>
             </div>
 
@@ -208,9 +295,30 @@ export const PdfToImageTool: React.FC = () => {
               </select>
             </div>
 
-            {format === 'jpeg' && (
-              <div className="control-field" style={{ gridColumn: '1 / -1' }}>
-                <label className="control-label">jpeg quality</label>
+            <div className="control-field">
+              <label className="control-label">page selection</label>
+              <select className="craft-select" value={pageMode} onChange={e => setPageMode(e.target.value as any)}>
+                <option value="all">All Pages ({totalPages || 0})</option>
+                <option value="custom">Custom Page Range</option>
+              </select>
+            </div>
+
+            {pageMode === 'custom' && (
+              <div className="control-field">
+                <label className="control-label">page range (e.g. 1-3, 5)</label>
+                <input
+                  type="text"
+                  className="craft-input"
+                  placeholder="e.g. 1-3, 5"
+                  value={customPages}
+                  onChange={e => setCustomPages(e.target.value)}
+                />
+              </div>
+            )}
+
+            {(format === 'jpeg' || format === 'webp') && (
+              <div className="control-field" style={{ gridColumn: pageMode === 'custom' ? undefined : '1 / -1' }}>
+                <label className="control-label">{format.toUpperCase()} quality</label>
                 <select className="craft-select" value={quality} onChange={e => setQuality(Number(e.target.value))}>
                   <option value="0.95">Very High (0.95)</option>
                   <option value="0.88">High (0.88)</option>
@@ -240,7 +348,7 @@ export const PdfToImageTool: React.FC = () => {
             </div>
             <div className="stat-item">
               <span className="stat-label">pages</span>
-              <span className="stat-value">{totalPages}</span>
+              <span className="stat-value">{file ? `${activePagesCount} of ${totalPages}` : 0}</span>
             </div>
             <div className="stat-item">
               <span className="stat-label">format</span>
@@ -252,9 +360,9 @@ export const PdfToImageTool: React.FC = () => {
             </div>
           </div>
 
-          <div className={`status-box ${errorMessage ? 'error' : isProcessing ? 'active-progress' : ''}`}>
+          <div className={`status-box ${errorMessage ? 'error' : isProcessing ? 'active-progress' : downloadInfo ? 'success' : ''}`}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="pulse-dot" style={{ backgroundColor: errorMessage ? '#ef4444' : undefined }}></span>
+              <span className="pulse-dot" style={{ backgroundColor: errorMessage ? '#ef4444' : downloadInfo ? '#10b981' : undefined }}></span>
               <span>{errorMessage || status}</span>
             </div>
             {isProcessing && <span>{progress}%</span>}
@@ -263,14 +371,37 @@ export const PdfToImageTool: React.FC = () => {
           <button
             type="button"
             onClick={handleConvert}
-            disabled={!file || isProcessing}
+            disabled={!file || isProcessing || activePagesCount === 0}
             className="btn-primary-mint"
             style={{ width: '100%', marginTop: '6px' }}
           >
             <FileDown size={15} />
-            <span>Convert to {format.toUpperCase()} ({totalPages > 1 ? `${totalPages} images in ZIP` : '1 image'})</span>
+            <span>Convert to {format.toUpperCase()} ({activePagesCount > 1 ? `${activePagesCount} images in ZIP` : '1 image'})</span>
             <span>→</span>
           </button>
+
+          {downloadInfo && (
+            <a
+              href={downloadInfo.url}
+              download={downloadInfo.filename}
+              className="btn-secondary"
+              style={{
+                width: '100%',
+                marginTop: '8px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                textDecoration: 'none',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '12px'
+              }}
+            >
+              <CheckCircle2 size={14} style={{ color: '#10b981' }} />
+              <span>download again ({downloadInfo.filename})</span>
+              <span>↳</span>
+            </a>
+          )}
         </>
       }
     />

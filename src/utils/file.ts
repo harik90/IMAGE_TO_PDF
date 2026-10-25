@@ -1,5 +1,25 @@
 import { zipSync } from 'fflate';
 
+export function getPublicAssetUrl(relativePath: string): string {
+  if (typeof window === 'undefined') return relativePath;
+  const cleanRel = relativePath.replace(/^\.?\//, '');
+  const baseUri = document.baseURI || window.location.href;
+  try {
+    const u = new URL(baseUri);
+    let dir = u.pathname;
+    if (!dir.endsWith('/')) {
+      if (!dir.includes('.')) {
+        dir = `${dir}/`;
+      } else {
+        dir = dir.substring(0, dir.lastIndexOf('/') + 1) || '/';
+      }
+    }
+    return new URL(cleanRel, `${u.origin}${dir}`).href;
+  } catch {
+    return cleanRel;
+  }
+}
+
 export function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 B';
   const k = 1024;

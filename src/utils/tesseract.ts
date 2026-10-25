@@ -1,4 +1,5 @@
 import { createWorker, PSM } from 'tesseract.js';
+import { getPublicAssetUrl } from './file';
 
 export interface OcrResultWord {
   text: string;
@@ -242,9 +243,9 @@ export async function runOcrOnImage(
   if (abortSignal?.aborted) throw new Error('OCR operation cancelled');
 
   const worker = await createWorker(lang, 1, {
-    workerPath: '/tesseract/worker.min.js',
-    corePath: '/tesseract/tesseract-core-lstm.wasm.js',
-    langPath: '/tesseract/lang-data',
+    workerPath: getPublicAssetUrl('tesseract/worker.min.js'),
+    corePath: getPublicAssetUrl('tesseract/tesseract-core-lstm.wasm.js'),
+    langPath: getPublicAssetUrl('tesseract/lang-data'),
     logger: m => {
       if (m.status === 'recognizing text' && typeof m.progress === 'number') {
         onProgress?.(Math.round(m.progress * 100), 'Recognizing characters...');
