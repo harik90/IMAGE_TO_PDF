@@ -1,10 +1,10 @@
-# image-to-pdf
+# image to pdf
 
-a tactile client-side image sequence to pdf compiler with zero telemetry.
+a quiet, client-side web utility to compile images into clean pdf documents.
 
 ## why
 
-most pdf converters upload your scans and private images to remote servers with hidden rate limits or compress them into blurry artifacts. i wanted a quiet utility that works entirely in your local browser memory, preserves full dynamic range, and gives you tactile control over page sequencing without any friction.
+most online image-to-pdf converters upload personal scans and photos to unknown third-party servers with upload limits and watermark spam. this tool runs completely inside your browser using canvas and jspdf, ensuring zero network transmission and instantaneous page layout control.
 
 ## run
 
@@ -18,8 +18,4 @@ python -m http.server 8080
 npx serve .
 ```
 
-open `http://localhost:8080` in your browser.
-
-## license
-
-mit
+or open `index.html` directly in any modern browser.
