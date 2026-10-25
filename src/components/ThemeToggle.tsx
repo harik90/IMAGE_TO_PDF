@@ -19,22 +19,26 @@ export const ThemeToggle: React.FC = () => {
   }, [isOpen]);
 
   const options: { id: ThemeMode; label: string; icon: React.ReactNode }[] = [
-    { id: 'dark', label: 'Dark', icon: <Moon size={14} /> },
-    { id: 'light', label: 'Light', icon: <Sun size={14} /> },
-    { id: 'system', label: 'System', icon: <Monitor size={14} /> }
+    { id: 'dark', label: 'Dark', icon: <Moon size={13} strokeWidth={1.75} /> },
+    { id: 'light', label: 'Light', icon: <Sun size={13} strokeWidth={1.75} /> },
+    { id: 'system', label: 'System', icon: <Monitor size={13} strokeWidth={1.75} /> }
   ];
 
   return (
     <div className="theme-toggle-wrap" ref={containerRef}>
       <button
         type="button"
-        className="icon-btn-subtle"
+        className={`header-theme-btn ${isOpen ? 'active' : ''}`}
         onClick={() => setIsOpen(prev => !prev)}
         title={`Theme: ${theme} (${resolvedTheme})`}
         aria-label="Toggle theme"
         aria-expanded={isOpen}
       >
-        {resolvedTheme === 'dark' ? <Moon size={15} /> : <Sun size={15} />}
+        {resolvedTheme === 'dark' ? (
+          <Moon size={13} strokeWidth={1.75} />
+        ) : (
+          <Sun size={13} strokeWidth={1.75} />
+        )}
       </button>
 
       {isOpen && (
@@ -49,9 +53,9 @@ export const ThemeToggle: React.FC = () => {
                 setIsOpen(false);
               }}
             >
-              <span className="theme-menu-icon">{opt.icon}</span>
-              <span className="theme-menu-label">{opt.label}</span>
-              {theme === opt.id && <Check size={13} className="theme-menu-check" />}
+              <span className="theme-opt-icon">{opt.icon}</span>
+              <span className="theme-opt-label">{opt.label}</span>
+              {theme === opt.id && <Check size={11} strokeWidth={2} className="theme-opt-check" />}
             </button>
           ))}
         </div>

@@ -280,48 +280,54 @@ h1, h2, h3, h4 {
 .header-nav-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 }
 
 .nav-text-link {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--text-secondary);
-  padding: 5px 9px;
+  height: 28px;
+  padding: 0 10px;
   border-radius: var(--radius-input);
-  transition: all 150ms ease;
+  border: 1px dotted transparent;
+  display: inline-flex;
+  align-items: center;
+  transition: all 140ms ease;
 }
 
 .nav-text-link:hover,
 .nav-text-link.active {
   color: var(--text-primary);
   background: var(--surface-well);
+  border-color: var(--border-dotted);
 }
 
 .header-search-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  height: 28px;
   background: var(--surface-well);
   border: 1px dotted var(--border-dotted);
   color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: 11.5px;
-  padding: 5px 10px;
+  padding: 0 10px;
   border-radius: var(--radius-input);
   cursor: pointer;
-  transition: all 150ms ease;
+  transition: all 140ms ease;
 }
 
 .header-search-btn:hover {
   color: var(--text-primary);
-  border-color: var(--border-focus);
+  border-color: var(--border-dotted-strong);
   background: var(--surface-card);
 }
 
 .search-shortcut {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 9.5px;
   padding: 1px 4px;
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.22);
@@ -333,17 +339,19 @@ h1, h2, h3, h4 {
 .craft-star-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+  height: 28px;
   background: var(--surface-well);
   border: 1px dotted var(--border-dotted);
   color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: 11.5px;
-  padding: 5px 10px;
+  padding: 0 10px;
   border-radius: var(--radius-input);
   cursor: pointer;
-  transition: all 150ms ease;
+  transition: all 140ms ease;
   white-space: nowrap;
+  text-decoration: none;
 }
 
 .craft-star-btn:hover {
@@ -352,38 +360,66 @@ h1, h2, h3, h4 {
   background: var(--surface-card);
 }
 
-.craft-star-btn .star-svg {
+.star-svg-lucide {
   color: #f59e0b;
+  fill: rgba(245, 158, 11, 0.22);
+  transition: all 160ms ease;
+  flex-shrink: 0;
+}
+
+.craft-star-btn:hover .star-svg-lucide {
+  fill: #f59e0b;
+  transform: scale(1.12);
+}
+
+.craft-star-btn.updated-pulse {
+  animation: star-glow 1600ms ease;
+}
+
+@keyframes star-glow {
+  0% { border-color: rgba(245, 158, 11, 0.9); box-shadow: 0 0 14px rgba(245, 158, 11, 0.45); }
+  100% { border-color: var(--border-dotted); box-shadow: none; }
+}
+
+.craft-star-btn .star-text {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.craft-star-btn:hover .star-text {
+  color: var(--text-primary);
 }
 
 .craft-star-btn .star-live-num {
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
-  padding-left: 5px;
+  padding-left: 6px;
   border-left: 1px dotted var(--border-dotted);
   color: var(--text-primary);
 }
 
-/* Icon Buttons & Theme Toggle */
-.icon-btn-subtle {
+/* Header Theme Toggle Button */
+.header-theme-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-input);
-  background: transparent;
-  border: 1px dotted transparent;
+  background: var(--surface-well);
+  border: 1px dotted var(--border-dotted);
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 150ms ease;
+  transition: all 140ms ease;
+  padding: 0;
 }
 
-.icon-btn-subtle:hover {
+.header-theme-btn:hover,
+.header-theme-btn.active {
   color: var(--text-primary);
-  background: var(--surface-well);
-  border-color: var(--border-dotted);
+  border-color: var(--border-dotted-strong);
+  background: var(--surface-card);
 }
 
 .theme-toggle-wrap {

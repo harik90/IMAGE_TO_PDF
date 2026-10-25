@@ -47,7 +47,7 @@ export const Header: React.FC<Props> = ({ onOpenSearch }) => {
             className="header-search-btn"
             aria-label="Search tools (Command K)"
           >
-            <Search size={13} />
+            <Search size={13} strokeWidth={1.75} />
             <span className="search-btn-label">search</span>
             <kbd className="search-shortcut">⌘K</kbd>
           </button>
