@@ -1,29 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ToolLayout } from '../components/ToolLayout';
 import { Dropzone } from '../components/Dropzone';
-import { formatBytes, validateFileSize, validateFileType, downloadBlob } from '../utils/file';
+import { formatBytes, validateFileSize, validateFileType } from '../utils/file';
 import { loadPdfDocument, extractTextFromPdfPage, renderPdfPageToCanvas } from '../utils/pdf';
-import { runOcrOnImage } from '../utils/tesseract';
+import {
+  runOcrOnImage,
+  preprocessImageForOcr,
+  detectGarbageText,
+  OcrResultWord,
+  DEFAULT_PREPROCESSING
+} from '../utils/tesseract';
+import { OcrResultViewer } from '../components/OcrResultViewer';
+import { FileText, Sliders, XCircle, Play } from 'lucide-react';
 
 export const PdfToTextTool: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [extractedText, setExtractedText] = useState<string>('');
+  const [extractedMarkdown, setExtractedMarkdown] = useState<string>('');
+  const [words, setWords] = useState<OcrResultWord[]>([]);
+  const [avgConfidence, setAvgConfidence] = useState<number>(0);
+
+  const [previewOriginalUrl, setPreviewOriginalUrl] = useState<string | undefined>(undefined);
+  const [previewProcessedUrl, setPreviewProcessedUrl] = useState<string | undefined>(undefined);
+
   const [enableOcrFallback, setEnableOcrFallback] = useState<boolean>(true);
-  const [ocrLanguage, setOcrLanguage] = useState<string>('eng');
+  const [ocrLanguage, setOcrLanguage] = useState<string>('hin+eng');
+  const [applyBinarization, setApplyBinarization] = useState<boolean>(true);
   const [outputFileName, setOutputFileName] = useState<string>('extracted-text.txt');
 
   const [status, setStatus] = useState<string>('Upload a PDF to extract text');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [copied, setCopied] = useState<boolean>(false);
+
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleFileSelected = (selectedFiles: FileList | File[]) => {
     setErrorMessage(null);
     const chosen = selectedFiles[0];
     if (!chosen) return;
 
-    const sizeCheck = validateFileSize(chosen, 50);
+    const sizeCheck = validateFileSize(chosen, 100);
     if (!sizeCheck.valid) {
       setErrorMessage(sizeCheck.error || 'File too large');
       return;
@@ -37,8 +54,22 @@ export const PdfToTextTool: React.FC = () => {
 
     setFile(chosen);
     setExtractedText('');
+    setExtractedMarkdown('');
+    setWords([]);
+    setAvgConfidence(0);
+    setPreviewOriginalUrl(undefined);
+    setPreviewProcessedUrl(undefined);
     setOutputFileName(chosen.name.replace(/\.pdf$/i, '') + '.txt');
     setStatus(`Selected "${chosen.name}" (${formatBytes(chosen.size)})`);
+  };
+
+  const handleCancel = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsProcessing(false);
+    setStatus('Processing cancelled by user');
   };
 
   const handleExtract = async () => {
@@ -48,72 +79,104 @@ export const PdfToTextTool: React.FC = () => {
     setStatus('Loading PDF pages...');
     setProgress(5);
 
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       const pdf = await loadPdfDocument(file);
       const totalPages = pdf.numPages;
       let fullText = '';
+      let fullMarkdown = '';
+      const collectedWords: OcrResultWord[] = [];
+      let totalConfidenceSum = 0;
+      let ocrPagesCount = 0;
 
       for (let i = 1; i <= totalPages; i++) {
+        if (controller.signal.aborted) throw new Error('Extraction cancelled');
+
         const page = await pdf.getPage(i);
         setStatus(`Extracting text from page ${i} of ${totalPages}...`);
-        setProgress(Math.round((i / totalPages) * 90));
+        setProgress(Math.round((i / totalPages) * 85));
 
         let pageText = await extractTextFromPdfPage(page);
+        let pageMd = pageText;
 
-        // Scanned page check: if fewer than 15 chars and OCR fallback enabled, run OCR
-        if (pageText.trim().length < 15 && enableOcrFallback) {
-          setStatus(`Page ${i} appears scanned. Running OCR (${ocrLanguage})...`);
-          const canvas = await renderPdfPageToCanvas(page, 2.5);
-          const ocrText = await runOcrOnImage(canvas, ocrLanguage);
-          pageText = ocrText.trim() ? ocrText : '[No text detected via OCR]';
+        // Check if page appears scanned or has corrupted/legacy font
+        const isCorruptOrScanned = detectGarbageText(pageText, ocrLanguage);
+
+        if ((isCorruptOrScanned || pageText.trim().length < 15) && enableOcrFallback) {
+          setStatus(`Page ${i} appears scanned or formatted with legacy fonts. Running 300 DPI OCR (${ocrLanguage})...`);
+
+          // Render high-DPI canvas (scale 4.16 for 300 DPI)
+          const rawCanvas = await renderPdfPageToCanvas(page, 4.16);
+
+          if (i === 1) {
+            setPreviewOriginalUrl(rawCanvas.toDataURL('image/jpeg', 0.85));
+          }
+
+          // Preprocess: Otsu binarize, denoise, auto-contrast
+          const preprocessed = preprocessImageForOcr(rawCanvas, {
+            ...DEFAULT_PREPROCESSING,
+            binarize: applyBinarization
+          });
+
+          if (i === 1) {
+            setPreviewProcessedUrl(preprocessed.toDataURL('image/jpeg', 0.85));
+          }
+
+          const ocrResult = await runOcrOnImage(
+            preprocessed,
+            ocrLanguage,
+            undefined,
+            (pct, msg) => {
+              setStatus(`Page ${i}: ${msg} (${pct}%)`);
+            },
+            controller.signal
+          );
+
+          pageText = ocrResult.text.trim() ? ocrResult.text : '[No text detected via OCR]';
+          pageMd = ocrResult.markdown.trim() ? ocrResult.markdown : pageText;
+          collectedWords.push(...ocrResult.words);
+          totalConfidenceSum += ocrResult.confidence;
+          ocrPagesCount++;
         }
 
         fullText += `--- Page ${i} ---\n` + (pageText || '[Empty Page]') + '\n\n';
+        fullMarkdown += `\n\n---\n*Page ${i}*\n\n` + (pageMd || '[Empty Page]') + '\n';
       }
 
       setExtractedText(fullText.trim());
+      setExtractedMarkdown(fullMarkdown.trim());
+      setWords(collectedWords);
+      setAvgConfidence(ocrPagesCount > 0 ? Math.round(totalConfidenceSum / ocrPagesCount) : 100);
       setStatus(`Completed extraction: ${totalPages} pages processed`);
       setProgress(100);
     } catch (err: any) {
-      console.error(err);
-      setErrorMessage(err.message || 'Failed to extract text from PDF');
-      setStatus('Extraction failed');
+      if (err.message?.includes('cancelled')) {
+        setStatus('Operation cancelled');
+      } else {
+        console.error(err);
+        setErrorMessage(err.message || 'Failed to extract text from PDF');
+        setStatus('Extraction failed');
+      }
     } finally {
       setIsProcessing(false);
+      abortControllerRef.current = null;
     }
-  };
-
-  const handleCopy = () => {
-    if (!extractedText) return;
-    navigator.clipboard.writeText(extractedText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleDownload = () => {
-    if (!extractedText) return;
-    const blob = new Blob([extractedText], { type: 'text/plain;charset=utf-8' });
-    downloadBlob(blob, outputFileName || 'extracted-text.txt');
   };
 
   return (
     <ToolLayout
-      title="PDF to Text (with OCR)"
-      description="Extract digital text and run optical character recognition on scanned PDF pages completely in your browser."
-      howItWorks="Digital text is parsed with coordinates preserved using pdfjs-dist. For scanned pages with few characters, the page is rendered to high-res canvas at 2.5x and optical character recognition is performed locally using self-hosted Tesseract."
-      faq="Never sends files to any server. Completely private and safe for confidential documents, tax forms, and contracts."
+      title="PDF to Text (with 300 DPI OCR)"
+      description="Extract digital text or run self-hosted 300 DPI Hindi and English OCR on scanned PDF pages completely in your browser."
+      howItWorks="Digital text is parsed preserving line structure. For scanned pages or legacy fonts, the page is rendered at 300 DPI, cleaned with Otsu binarization and auto-contrast, and recognized with local best models."
+      faq="Completely client-side in browser memory. Never uploads confidential documents, government forms, or contracts to any server."
       amberCardContent={
         <>
           <div className="card-topline">
             <span className="card-tag">
               <span className="glyph-badge">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
+                <FileText size={14} />
               </span>
               source pdf
             </span>
@@ -125,15 +188,20 @@ export const PdfToTextTool: React.FC = () => {
             multiple={false}
             onFilesSelected={handleFileSelected}
             title={file ? file.name : 'Select PDF or drop here'}
-            subtitle={file ? formatBytes(file.size) : 'Single PDF document up to 50MB'}
+            subtitle={file ? formatBytes(file.size) : 'Single PDF document up to 100MB'}
           />
 
           {file && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Selected: {file.name}</span>
               <button
-                onClick={() => { setFile(null); setExtractedText(''); }}
-                className="btn-secondary"
+                type="button"
+                onClick={() => {
+                  setFile(null);
+                  setExtractedText('');
+                  setExtractedMarkdown('');
+                }}
+                className="btn-secondary-compact"
                 style={{ color: '#ef4444' }}
               >
                 clear
@@ -147,10 +215,7 @@ export const PdfToTextTool: React.FC = () => {
           <div className="card-topline">
             <span className="card-tag">
               <span className="glyph-badge">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="3"></circle>
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                </svg>
+                <Sliders size={14} />
               </span>
               extraction options
             </span>
@@ -159,18 +224,18 @@ export const PdfToTextTool: React.FC = () => {
 
           <div className="control-grid">
             <div className="control-field" style={{ gridColumn: '1 / -1' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '12px' }}>
+              <label className="toggle-label-inline">
                 <input
                   type="checkbox"
                   checked={enableOcrFallback}
                   onChange={e => setEnableOcrFallback(e.target.checked)}
-                  style={{ accentColor: 'var(--mint-primary)' }}
+                  className="toggle-checkbox"
                 />
-                <span>Auto-run OCR if page contains scanned images or no text</span>
+                <span>Auto-run OCR on scanned pages &amp; legacy fonts</span>
               </label>
             </div>
 
-            <div className="control-field" style={{ gridColumn: '1 / -1' }}>
+            <div className="control-field">
               <label className="control-label">ocr language</label>
               <select
                 className="craft-select"
@@ -178,10 +243,24 @@ export const PdfToTextTool: React.FC = () => {
                 onChange={e => setOcrLanguage(e.target.value)}
                 disabled={!enableOcrFallback}
               >
-                <option value="eng">English (eng)</option>
-                <option value="hin">Hindi (hin)</option>
-                <option value="eng+hin">English + Hindi (eng+hin)</option>
+                <option value="hin+eng">Hindi + English (hin+eng) · Recommended</option>
+                <option value="hin">Hindi only (hin)</option>
+                <option value="eng">English only (eng)</option>
               </select>
+            </div>
+
+            <div className="control-field">
+              <label className="control-label">preprocessing</label>
+              <label className="toggle-label-inline" style={{ marginTop: '6px' }}>
+                <input
+                  type="checkbox"
+                  checked={applyBinarization}
+                  onChange={e => setApplyBinarization(e.target.checked)}
+                  disabled={!enableOcrFallback}
+                  className="toggle-checkbox"
+                />
+                <span>Otsu Binarize &amp; Denoise</span>
+              </label>
             </div>
           </div>
         </>
@@ -191,13 +270,11 @@ export const PdfToTextTool: React.FC = () => {
           <div className="card-topline">
             <span className="card-tag">
               <span className="glyph-badge">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
+                <Play size={14} />
               </span>
-              text output
+              action &amp; status
             </span>
-            <span className="handwritten-hint">(plain text)</span>
+            <span className="handwritten-hint">(process in memory)</span>
           </div>
 
           <div className="stats-row">
@@ -210,12 +287,12 @@ export const PdfToTextTool: React.FC = () => {
               <span className="stat-value">{file ? formatBytes(file.size) : '0 B'}</span>
             </div>
             <div className="stat-item">
-              <span className="stat-label">tool</span>
-              <span className="stat-value">pdf-to-text</span>
+              <span className="stat-label">engine</span>
+              <span className="stat-value">{enableOcrFallback ? 'pdfjs + tesseract' : 'pdfjs native'}</span>
             </div>
             <div className="stat-item">
-              <span className="stat-label">output</span>
-              <span className="stat-value">{outputFileName}</span>
+              <span className="stat-label">language</span>
+              <span className="stat-value">{ocrLanguage}</span>
             </div>
           </div>
 
@@ -228,7 +305,7 @@ export const PdfToTextTool: React.FC = () => {
           </div>
 
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: '200px' }}>
+            <div style={{ flex: 1, minWidth: '180px' }}>
               <input
                 type="text"
                 className="craft-input"
@@ -237,38 +314,44 @@ export const PdfToTextTool: React.FC = () => {
                 placeholder="extracted-text.txt"
               />
             </div>
-            <button
-              onClick={handleExtract}
-              disabled={!file || isProcessing}
-              className="btn-primary-mint"
-            >
-              <span>extract text</span>
-              <span>→</span>
-            </button>
+
+            {isProcessing ? (
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="btn-secondary-compact"
+                style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+              >
+                <XCircle size={14} />
+                <span>Cancel</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleExtract}
+                disabled={!file}
+                className="btn-primary-mint"
+              >
+                <span>Extract Text</span>
+                <span>→</span>
+              </button>
+            )}
           </div>
         </>
       }
       fileSequenceContent={
         extractedText ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '13px', fontWeight: 600 }}>Extracted Content</span>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button onClick={handleCopy} className="btn-secondary">
-                  {copied ? '✓ copied!' : 'copy text'}
-                </button>
-                <button onClick={handleDownload} className="btn-primary-mint" style={{ padding: '6px 14px', fontSize: '12px' }}>
-                  download .txt
-                </button>
-              </div>
-            </div>
-            <textarea
-              className="craft-textarea"
-              style={{ minHeight: '300px', fontFamily: 'var(--font-mono)', lineHeight: 1.6 }}
-              value={extractedText}
-              onChange={e => setExtractedText(e.target.value)}
-            />
-          </div>
+          <OcrResultViewer
+            text={extractedText}
+            markdown={extractedMarkdown}
+            confidence={avgConfidence}
+            words={words}
+            originalImageUrl={previewOriginalUrl}
+            processedImageUrl={previewProcessedUrl}
+            fileName={outputFileName}
+            onTextChange={setExtractedText}
+            onMarkdownChange={setExtractedMarkdown}
+          />
         ) : undefined
       }
     />
