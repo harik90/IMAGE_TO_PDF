@@ -11,7 +11,7 @@ interface Props {
 
 export const MoreMenu: React.FC<Props> = ({ isOpen, onClose, triggerRef }) => {
   const location = useLocation();
-  const menuRef = useRef<HTMLDivElement>(null);
+  const windowRef = useRef<HTMLDivElement>(null);
 
   // Close on route change
   useEffect(() => {
@@ -27,8 +27,8 @@ export const MoreMenu: React.FC<Props> = ({ isOpen, onClose, triggerRef }) => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as Node;
       if (
-        menuRef.current &&
-        !menuRef.current.contains(target) &&
+        windowRef.current &&
+        !windowRef.current.contains(target) &&
         triggerRef?.current &&
         !triggerRef.current.contains(target)
       ) {
@@ -65,40 +65,57 @@ export const MoreMenu: React.FC<Props> = ({ isOpen, onClose, triggerRef }) => {
   ];
 
   return (
-    <>
-      {/* Mobile backdrop */}
-      <div className="more-menu-backdrop" onClick={onClose} aria-hidden="true" />
+    <div
+      className="more-modal-overlay"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="All file utilities"
+    >
+      <div
+        className="more-modal-window"
+        ref={windowRef}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="more-modal-header">
+          <div className="more-modal-title-group">
+            <span className="more-modal-title">all utilities</span>
+            <span className="accent-script-note">*(14 in-memory tools)*</span>
+          </div>
 
-      {/* Menu Container (Popover on Desktop, Sheet on Mobile) */}
-      <div className="more-menu-container" ref={menuRef} role="dialog" aria-modal="true" aria-label="All file tools">
-        <div className="more-menu-header-mobile">
-          <span className="more-menu-mobile-title">All File Tools</span>
-          <button className="icon-btn-subtle" onClick={onClose} aria-label="Close menu">
-            <X size={18} />
+          <button
+            type="button"
+            className="icon-btn-subtle"
+            onClick={onClose}
+            aria-label="Close dialog"
+          >
+            <X size={16} />
           </button>
         </div>
 
-        <div className="more-menu-grid">
+        <div className="more-modal-body">
           {groups.map(group => (
-            <div key={group.title} className="more-menu-column">
-              <div className="more-menu-group-title">{group.title}</div>
-              <div className="more-menu-list">
+            <div key={group.title} className="more-modal-column">
+              <div className="more-modal-group-title">{group.title}</div>
+              <div className="more-modal-list">
                 {group.tools.map(tool => (
                   <Link
                     key={tool.id}
                     to={tool.route}
-                    className="more-menu-item"
+                    className="more-modal-item"
                     onClick={onClose}
                   >
-                    <div className="more-menu-icon-wrap">
-                      {tool.icon({ size: 16 })}
+                    <div className="more-modal-icon-wrap">
+                      {tool.icon({ size: 15 })}
                     </div>
-                    <div className="more-menu-text-wrap">
-                      <div className="more-menu-item-name">
+                    <div className="more-modal-text-wrap">
+                      <div className="more-modal-item-name">
                         <span>{tool.name}</span>
-                        <ArrowRight size={12} className="more-menu-arrow" />
+                        <ArrowRight size={11} className="more-modal-arrow" />
                       </div>
-                      <div className="more-menu-item-desc">{tool.description}</div>
+                      <div className="more-modal-item-desc" title={tool.description}>
+                        {tool.description}
+                      </div>
                     </div>
                   </Link>
                 ))}
@@ -107,6 +124,6 @@ export const MoreMenu: React.FC<Props> = ({ isOpen, onClose, triggerRef }) => {
           ))}
         </div>
       </div>
-    </>
+    </div>
   );
 };
