@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { toolsRegistry } from '../tools/registry';
-import { Search, ChevronDown, Sparkles } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import { MoreMenu } from './MoreMenu';
 import { GitHubStarButton } from './GitHubStarButton';
 import { ThemeToggle } from './ThemeToggle';
@@ -19,30 +19,28 @@ export const Header: React.FC<Props> = ({ onOpenSearch }) => {
   return (
     <header className="app-header">
       <div className="header-inner">
-        {/* Left: Brand / Breadcrumb */}
-        <Link to="/" className="header-brand" aria-label="image_to_pdf home">
-          <div className="header-logo-mark">
-            <Sparkles size={14} className="logo-spark" />
-          </div>
-          <span className="brand-wordmark">image_to_pdf</span>
+        {/* Left: Breadcrumb path in technical mono */}
+        <Link to="/" className="header-brand-mono" aria-label="image_to_pdf home">
+          <span className="mono-path-tilde">~/</span>
+          <span className="mono-path-root">image_to_pdf</span>
           {currentTool && (
             <>
-              <span className="breadcrumb-sep">/</span>
-              <span className="breadcrumb-tool" title={currentTool.name}>
-                {currentTool.name}
+              <span className="mono-sep">/</span>
+              <span className="mono-path-tool" title={currentTool.name}>
+                {currentTool.id}
               </span>
             </>
           )}
         </Link>
 
-        {/* Right: Nav Actions */}
+        {/* Right: Actions */}
         <nav className="header-nav-actions" aria-label="Main navigation">
-          {/* 1. Tools */}
+          {/* 1. Tools anchor */}
           <Link
             to="/"
             className={`nav-text-link ${location.pathname === '/' ? 'active' : ''}`}
           >
-            Tools
+            tools
           </Link>
 
           {/* 2. More ▾ */}
@@ -54,8 +52,8 @@ export const Header: React.FC<Props> = ({ onOpenSearch }) => {
             aria-expanded={isMoreOpen}
             aria-label="More tools menu"
           >
-            <span>More</span>
-            <ChevronDown size={14} className={`chevron-icon ${isMoreOpen ? 'open' : ''}`} />
+            <span>more</span>
+            <ChevronDown size={13} className={`chevron-icon ${isMoreOpen ? 'open' : ''}`} />
           </button>
 
           {/* 3. Search */}
@@ -65,12 +63,12 @@ export const Header: React.FC<Props> = ({ onOpenSearch }) => {
             className="header-search-btn"
             aria-label="Search tools (Command K)"
           >
-            <Search size={14} />
-            <span className="search-btn-label">Search</span>
+            <Search size={13} />
+            <span className="search-btn-label">search</span>
             <kbd className="search-shortcut">⌘K</kbd>
           </button>
 
-          {/* 4. GitHub Star Button */}
+          {/* 4. Live GitHub Star Button */}
           <GitHubStarButton />
 
           {/* 5. Theme Toggle */}
