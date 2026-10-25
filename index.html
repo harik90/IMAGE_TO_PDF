@@ -3,107 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>~/ghost/image-to-pdf</title>
-    <meta name="description" content="tactile client-side image sequence to pdf compiler with zero telemetry">
+    <title>image to pdf — quiet craft studio</title>
+    <meta name="description" content="fast, private, client-side image to pdf compiler with precise layout controls and zero data collection.">
+    <meta name="theme-color" content="#0C0D10">
 
-    <!-- Tri-Font Typography: Inter, Caveat, JetBrains Mono -->
+    <!-- Fonts: Manrope, Gaegu, IBM Plex Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- jsPDF Engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         :root {
-            /* typography */
-            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            --font-script: 'Caveat', cursive;
-            --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+            --font-sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            --font-script: 'Gaegu', cursive;
 
-            /* transitions */
-            --ease-tactile: cubic-bezier(0.22, 1, 0.36, 1);
-            --transition-smooth: 220ms cubic-bezier(0.22, 1, 0.36, 1);
+            --radius-card: 18px;
+            --radius-dialog: 20px;
+            --radius-well: 12px;
+            --radius-control: 10px;
+            --radius-pill: 9999px;
+
+            --ease-craft: cubic-bezier(0.2, 0.9, 0.3, 1);
         }
 
-        /* Dark Mode (Obsidian Base — Default) */
-        [data-theme="dark"] {
-            --bg-canvas: #09090B;
-            --dot-color: rgba(255, 255, 255, 0.07);
-            --bg-sticky: rgba(18, 18, 22, 0.84);
-            --bg-well: rgba(0, 0, 0, 0.42);
-            --border-well: rgba(255, 255, 255, 0.05);
-            --border-ui: rgba(255, 255, 255, 0.09);
-            --border-ui-hover: rgba(255, 255, 255, 0.18);
+        /* Dark Theme (Ink) */
+        html[data-theme="dark"] {
+            --canvas: #0C0D10;
+            --grid-line: rgba(255, 255, 255, 0.04);
+            --surface-float: rgba(20, 21, 26, 0.82);
+            --surface-solid: #14151a;
+            --surface-card: #131418;
+            --surface-card-hover: #191b22;
+            --surface-well: rgba(0, 0, 0, 0.35);
+            --border-well: rgba(255, 255, 255, 0.06);
+            --border-dim: rgba(255, 255, 255, 0.07);
+            --border-focus: rgba(255, 255, 255, 0.28);
+            
+            --text-primary: #EEF0F4;
+            --text-secondary: #9AA0AC;
+            --text-muted: #6B7180;
 
-            --text-primary: #F4F4F6;
-            --text-secondary: #A1A1AA;
-            --text-muted: #71717A;
+            --sand-bg: rgba(130, 98, 40, 0.20);
+            --sand-border: rgba(235, 190, 100, 0.16);
+            --sand-text: #FBEFD3;
+            --sand-accent: #E5B25D;
 
-            /* Tinted Bento Cards */
-            --bento-amber-bg: rgba(120, 62, 18, 0.24);
-            --bento-amber-border: rgba(251, 146, 60, 0.16);
-            --bento-amber-border-hover: rgba(251, 146, 60, 0.38);
-            --bento-amber-text: #FEF3C7;
-            --bento-amber-icon-bg: rgba(251, 146, 60, 0.15);
+            --iris-bg: rgba(70, 60, 150, 0.22);
+            --iris-border: rgba(160, 150, 255, 0.18);
+            --iris-text: #E6E3FF;
+            --iris-accent: #A59BFF;
 
-            --bento-plum-bg: rgba(105, 24, 58, 0.24);
-            --bento-plum-border: rgba(244, 114, 182, 0.16);
-            --bento-plum-border-hover: rgba(244, 114, 182, 0.38);
-            --bento-plum-text: #FCE7F3;
-            --bento-plum-icon-bg: rgba(244, 114, 182, 0.15);
+            --sage-bg: rgba(40, 90, 70, 0.22);
+            --sage-border: rgba(130, 215, 170, 0.16);
+            --sage-text: #DDF6E8;
+            --sage-accent: #48C78E;
 
-            --bento-emerald-bg: rgba(14, 72, 52, 0.24);
-            --bento-emerald-border: rgba(52, 211, 153, 0.16);
-            --bento-emerald-text: #D1FAE5;
-            --bento-emerald-icon-bg: rgba(52, 211, 153, 0.15);
+            --elevation: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 30px -10px rgba(0, 0, 0, 0.50);
+            --elevation-sm: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 4px 14px -4px rgba(0, 0, 0, 0.40);
 
-            --specular-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 10px 28px -8px rgba(0, 0, 0, 0.45);
-            --popover-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.12), 0 24px 48px -12px rgba(0, 0, 0, 0.7);
-            --pulse-dot-color: #34D399;
-            --pulse-dot-shadow: rgba(52, 211, 153, 0.4);
-            --code-bg: rgba(255, 255, 255, 0.06);
-            --row-hover: rgba(255, 255, 255, 0.03);
+            --icon-tint-bg: rgba(255, 255, 255, 0.08);
+            --icon-stroke: #EEF0F4;
         }
 
-        /* Light Mode (Alabaster Base) */
-        [data-theme="light"] {
-            --bg-canvas: #FAF9F6;
-            --dot-color: rgba(0, 0, 0, 0.06);
-            --bg-sticky: rgba(255, 255, 255, 0.88);
-            --bg-well: #F1F0EC;
+        /* Light Theme (Paper) */
+        html[data-theme="light"] {
+            --canvas: #F7F5F0;
+            --grid-line: rgba(0, 0, 0, 0.04);
+            --surface-float: rgba(255, 255, 255, 0.88);
+            --surface-solid: #FFFFFF;
+            --surface-card: #FFFFFF;
+            --surface-card-hover: #F2EFEB;
+            --surface-well: #EFECE4;
             --border-well: rgba(0, 0, 0, 0.06);
-            --border-ui: rgba(0, 0, 0, 0.08);
-            --border-ui-hover: rgba(0, 0, 0, 0.18);
+            --border-dim: rgba(0, 0, 0, 0.08);
+            --border-focus: rgba(0, 0, 0, 0.35);
 
-            --text-primary: #111113;
-            --text-secondary: #52525B;
-            --text-muted: #71717A;
+            --text-primary: #16171B;
+            --text-secondary: #555A66;
+            --text-muted: #7A7F8C;
 
-            /* Tinted Bento Cards */
-            --bento-amber-bg: #FFFBEB;
-            --bento-amber-border: #FDE68A;
-            --bento-amber-border-hover: #F59E0B;
-            --bento-amber-text: #78350F;
-            --bento-amber-icon-bg: rgba(217, 119, 6, 0.15);
+            --sand-bg: #FDF6E3;
+            --sand-border: #F1DEA8;
+            --sand-text: #6B4A0E;
+            --sand-accent: #8E6215;
 
-            --bento-plum-bg: #FDF2F8;
-            --bento-plum-border: #FBCFE8;
-            --bento-plum-border-hover: #EC4899;
-            --bento-plum-text: #831843;
-            --bento-plum-icon-bg: rgba(219, 39, 119, 0.15);
+            --iris-bg: #F1EFFF;
+            --iris-border: #D4CFFF;
+            --iris-text: #3B2F8F;
+            --iris-accent: #5342BE;
 
-            --bento-emerald-bg: #ECFDF5;
-            --bento-emerald-border: #A7F3D0;
-            --bento-emerald-text: #064E3B;
-            --bento-emerald-icon-bg: rgba(16, 185, 129, 0.15);
+            --sage-bg: #EBF8F0;
+            --sage-border: #BFE6D0;
+            --sage-text: #1F5A40;
+            --sage-accent: #177245;
 
-            --specular-shadow: inset 0 1px 0 0 #FFFFFF, 0 8px 24px -6px rgba(15, 23, 42, 0.06);
-            --popover-shadow: inset 0 1px 0 0 #FFFFFF, 0 20px 40px -10px rgba(15, 23, 42, 0.12);
-            --pulse-dot-color: #059669;
-            --pulse-dot-shadow: rgba(5, 150, 105, 0.3);
-            --code-bg: rgba(0, 0, 0, 0.05);
-            --row-hover: rgba(0, 0, 0, 0.02);
+            --elevation: inset 0 1px 0 #FFFFFF, 0 10px 26px -10px rgba(20, 24, 40, 0.10);
+            --elevation-sm: inset 0 1px 0 #FFFFFF, 0 4px 12px -3px rgba(20, 24, 40, 0.06);
+
+            --icon-tint-bg: rgba(0, 0, 0, 0.05);
+            --icon-stroke: #16171B;
         }
 
         * {
@@ -116,366 +118,451 @@
         body {
             font-family: var(--font-sans);
             font-size: 15px;
-            line-height: 1.65;
+            line-height: 1.6;
+            background-color: var(--canvas);
+            background-image: 
+                linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+            background-size: 24px 24px;
             color: var(--text-primary);
-            background-color: var(--bg-canvas);
-            background-image: radial-gradient(circle, var(--dot-color) 1px, transparent 1px);
-            background-size: 20px 20px;
-            background-position: 0 0;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow-x: hidden;
-            transition: background-color var(--transition-smooth), color var(--transition-smooth);
+            transition: background-color 220ms ease, color 220ms ease;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Links with wavy underlines */
-        a.wavy-link, .wavy-link {
+        a {
             color: inherit;
-            text-decoration: underline wavy;
-            text-underline-offset: 5px;
-            cursor: pointer;
-            transition: opacity var(--transition-smooth);
-        }
-        a.wavy-link:hover, .wavy-link:hover {
-            opacity: 0.8;
+            text-decoration: underline dotted;
+            text-underline-offset: 4px;
         }
 
         /* Top Sticky Bar */
-        .sticky-bar {
+        .top-bar {
             position: sticky;
             top: 0;
-            z-index: 40;
-            width: 100%;
-            background: var(--bg-sticky);
-            backdrop-filter: blur(20px) saturate(160%);
-            -webkit-backdrop-filter: blur(20px) saturate(160%);
-            border-bottom: 1px solid var(--border-ui);
-            padding: 10px 20px;
-            transition: background var(--transition-smooth), border-color var(--transition-smooth);
+            z-index: 50;
+            background: var(--surface-float);
+            backdrop-filter: blur(18px) saturate(150%);
+            -webkit-backdrop-filter: blur(18px) saturate(150%);
+            border-bottom: 1px solid var(--border-dim);
+            transition: background 220ms ease, border-color 220ms ease;
         }
 
-        .sticky-bar-inner {
-            max-width: 660px;
+        .top-bar-inner {
+            max-width: 1000px;
             margin: 0 auto;
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
+            gap: 16px;
         }
 
         .breadcrumb {
             font-family: var(--font-mono);
             font-size: 12px;
-            color: var(--text-primary);
+            color: var(--text-secondary);
             display: flex;
             align-items: center;
             gap: 6px;
-            text-decoration: none;
             letter-spacing: -0.01em;
-            user-select: none;
         }
 
-        .breadcrumb-cursor {
-            display: inline-block;
-            width: 6px;
-            height: 12px;
-            background: var(--text-muted);
-            animation: blink 1.2s infinite;
+        .breadcrumb .root {
+            color: var(--text-muted);
         }
 
-        @keyframes blink {
-            0%, 49% { opacity: 1; }
-            50%, 100% { opacity: 0; }
+        .breadcrumb .current {
+            color: var(--text-primary);
+            font-weight: 500;
         }
 
-        .nav-actions {
+        .top-anchors {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .anchor-link {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            text-decoration: none;
+            text-transform: lowercase;
+            letter-spacing: 0.02em;
+            transition: color 150ms ease;
+        }
+
+        .anchor-link:hover {
+            color: var(--text-primary);
+        }
+
+        .top-actions {
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .telemetry-chip {
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid var(--border-dim);
+            color: var(--text-secondary);
             font-family: var(--font-mono);
             font-size: 11px;
-            color: var(--text-muted);
-            padding: 4px 8px;
-            border-radius: 8px;
-            background: var(--bg-well);
-            border: 1px solid var(--border-well);
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-tactile {
-            font-family: var(--font-mono);
-            font-size: 11px;
-            font-weight: 500;
-            color: var(--text-primary);
-            background: var(--bg-well);
-            border: 1px solid var(--border-ui);
-            border-radius: 8px;
-            padding: 5px 9px;
+            padding: 6px 10px;
+            border-radius: var(--radius-control);
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            transition: all var(--transition-smooth);
-            user-select: none;
+            gap: 6px;
+            transition: all 180ms ease;
         }
 
-        .btn-tactile:hover {
-            border-color: var(--border-ui-hover);
-            transform: translateY(-1px);
+        .btn-ghost:hover {
+            color: var(--text-primary);
+            border-color: var(--border-focus);
+            background: var(--icon-tint-bg);
         }
 
-        .btn-tactile:active {
-            transform: translateY(0);
-        }
-
-        .btn-tactile kbd {
+        .btn-ghost kbd {
             font-family: var(--font-mono);
             font-size: 10px;
-            color: var(--text-muted);
-            background: var(--code-bg);
             padding: 1px 4px;
             border-radius: 4px;
+            border: 1px solid var(--border-dim);
+            background: var(--surface-well);
+            color: var(--text-muted);
         }
 
-        /* SVG Icon Helpers: 1.75px stroke with 15% opacity duotone fill container */
-        .icon-box {
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            transition: all var(--transition-smooth);
-        }
-
-        .icon-box svg {
-            width: 16px;
-            height: 16px;
-            stroke-width: 1.75;
-            stroke: currentColor;
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        /* Viewport Spine: 660px max-width container */
-        .viewport-spine {
-            max-width: 660px;
+        /* Main Viewport Spine */
+        .workspace-spine {
+            max-width: 1000px;
             width: 100%;
             margin: 0 auto;
-            padding: 24px 20px 80px 20px;
+            padding: 32px 20px 80px;
+            flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 28px;
         }
 
-        /* Header typography */
+        /* Section Headings with Hand-drawn script notes */
         .section-header {
             display: flex;
             align-items: baseline;
-            justify-content: space-between;
+            gap: 10px;
             margin-bottom: 12px;
         }
 
         .section-title {
             font-family: var(--font-sans);
             font-weight: 700;
-            font-size: 17px;
-            letter-spacing: -0.03em;
+            font-size: 18px;
+            letter-spacing: -0.025em;
             color: var(--text-primary);
         }
 
-        .script-note {
+        .side-note {
             font-family: var(--font-script);
-            font-weight: 600;
-            font-size: 21px;
-            line-height: 1.3;
-            color: var(--text-secondary);
-            margin-left: 6px;
+            font-size: 17px;
+            line-height: 1;
+            color: var(--text-muted);
         }
 
-        /* Tilted Bento Pair */
-        .bento-grid {
+        /* 2-Column Highlight Pair with Subtle Tilt */
+        .highlight-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 20px;
             perspective: 1000px;
         }
 
-        @media (max-width: 580px) {
-            .bento-grid {
+        @media (max-width: 780px) {
+            .highlight-grid {
                 grid-template-columns: 1fr;
-                gap: 14px;
             }
         }
 
-        .bento-card {
-            border-radius: 14px;
-            padding: 18px;
+        .tilted-card {
+            border-radius: var(--radius-card);
+            padding: 22px;
             position: relative;
-            cursor: pointer;
-            user-select: none;
+            box-shadow: var(--elevation);
+            transition: transform 240ms var(--ease-craft), box-shadow 240ms ease;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            min-height: 132px;
-            box-shadow: var(--specular-shadow);
-            transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-smooth);
-            will-change: transform;
+            gap: 16px;
         }
 
-        /* Tactile Card Rotation */
-        .bento-amber {
-            background: var(--bento-amber-bg);
-            border: 1px solid var(--bento-amber-border);
-            color: var(--bento-amber-text);
-            transform: rotate(-1.15deg);
+        .tilted-card.card-sand {
+            background-color: var(--sand-bg);
+            border: 1px solid var(--sand-border);
+            color: var(--sand-text);
+            transform: rotate(-0.8deg);
         }
 
-        .bento-amber .icon-box {
-            background: var(--bento-amber-icon-bg);
-            color: var(--bento-amber-text);
+        .tilted-card.card-iris {
+            background-color: var(--iris-bg);
+            border: 1px solid var(--iris-border);
+            color: var(--iris-text);
+            transform: rotate(0.8deg);
         }
 
-        .bento-amber:hover, .bento-amber:focus-within {
+        .tilted-card:hover,
+        .tilted-card:focus-within {
             transform: rotate(0deg) translateY(-2px);
-            border-color: var(--bento-amber-border-hover);
         }
 
-        .bento-plum {
-            background: var(--bento-plum-bg);
-            border: 1px solid var(--bento-plum-border);
-            color: var(--bento-plum-text);
-            transform: rotate(1.05deg);
+        @media (prefers-reduced-motion: reduce) {
+            .tilted-card,
+            .tilted-card.card-sand,
+            .tilted-card.card-iris {
+                transform: none !important;
+                transition: none !important;
+            }
         }
 
-        .bento-plum .icon-box {
-            background: var(--bento-plum-icon-bg);
-            color: var(--bento-plum-text);
-        }
-
-        .bento-plum:hover, .bento-plum:focus-within {
-            transform: rotate(0deg) translateY(-2px);
-            border-color: var(--bento-plum-border-hover);
-        }
-
-        .bento-plum.disabled {
-            opacity: 0.45;
-            cursor: not-allowed;
-            pointer-events: none;
-            transform: rotate(1.05deg) !important;
-        }
-
-        .bento-top-row {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            margin-bottom: 12px;
-        }
-
-        .bento-card-title {
-            font-family: var(--font-sans);
-            font-weight: 700;
-            font-size: 16px;
-            letter-spacing: -0.02em;
-        }
-
-        .bento-script {
-            font-family: var(--font-script);
-            font-weight: 600;
-            font-size: 21px;
-            line-height: 1.2;
-            display: block;
-            margin-top: -2px;
-            opacity: 0.92;
-        }
-
-        .bento-subtext {
-            font-family: var(--font-mono);
-            font-size: 11px;
-            opacity: 0.75;
-            margin-top: 6px;
-            line-height: 1.4;
-        }
-
-        /* Dragover state for dropzone */
-        .bento-amber.dragover {
-            border-color: var(--bento-amber-text);
-            transform: rotate(0deg) scale(1.02);
-        }
-
-        /* Emerald Nested Well Card: Telemetry & Live State */
-        .emerald-well {
-            background: var(--bento-emerald-bg);
-            border: 1px solid var(--bento-emerald-border);
-            border-radius: 14px;
-            padding: 16px 18px;
-            color: var(--bento-emerald-text);
-            box-shadow: var(--specular-shadow);
-        }
-
-        .emerald-well-header {
+        .card-topline {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 12px;
-        }
-
-        .emerald-well-title-group {
-            display: flex;
-            align-items: center;
             gap: 8px;
         }
 
-        /* Live Pulse Dot (6px circle) */
-        .pulse-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 9999px;
-            background-color: var(--pulse-dot-color);
-            position: relative;
-            display: inline-block;
+        .card-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: currentColor;
+            opacity: 0.9;
         }
 
-        .pulse-dot::after {
-            content: '';
-            position: absolute;
-            inset: -3px;
-            border-radius: 9999px;
-            background-color: var(--pulse-dot-shadow);
-            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        .card-script-tag {
+            font-family: var(--font-script);
+            font-size: 19px;
+            color: currentColor;
+            opacity: 0.85;
+            line-height: 1;
         }
 
-        @keyframes pulse-ring {
-            0% { transform: scale(0.8); opacity: 0.8; }
-            50% { transform: scale(1.8); opacity: 0; }
-            100% { transform: scale(0.8); opacity: 0; }
-        }
-
-        .telemetry-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
+        /* Dropzone Surface inside Sand Card */
+        .dropzone-box {
+            border: 1.5px dashed var(--sand-accent);
+            background: var(--surface-well);
+            border-radius: var(--radius-well);
+            padding: 24px 18px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 180ms ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             gap: 10px;
         }
 
-        @media (max-width: 540px) {
-            .telemetry-grid {
-                grid-template-columns: repeat(2, 1fr);
+        .dropzone-box:hover,
+        .dropzone-box.drag-active {
+            border-color: currentColor;
+            background: rgba(0, 0, 0, 0.12);
+        }
+
+        .glyph-container {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--icon-tint-bg);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--icon-stroke);
+            transition: transform 180ms ease;
+        }
+
+        .dropzone-box:hover .glyph-container {
+            transform: scale(1.06);
+        }
+
+        .dropzone-title {
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 600;
+            color: currentColor;
+        }
+
+        .dropzone-sub {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            opacity: 0.75;
+        }
+
+        .quick-actions-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .btn-tiny-tool {
+            background: var(--surface-well);
+            border: 1px solid var(--border-well);
+            color: currentColor;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: opacity 150ms ease, background 150ms ease;
+        }
+
+        .btn-tiny-tool:hover:not(:disabled) {
+            background: rgba(0, 0, 0, 0.16);
+        }
+
+        .btn-tiny-tool:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        /* Iris Card: Settings Controls Grid */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .control-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            opacity: 0.8;
+            letter-spacing: -0.01em;
+        }
+
+        .craft-select,
+        .craft-input {
+            width: 100%;
+            background: var(--surface-well);
+            border: 1px solid var(--border-well);
+            border-radius: var(--radius-control);
+            padding: 7px 10px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: currentColor;
+            outline: none;
+            transition: border-color 150ms ease;
+        }
+
+        .craft-select:focus,
+        .craft-input:focus {
+            border-color: currentColor;
+        }
+
+        .craft-select option {
+            background: var(--surface-solid);
+            color: var(--text-primary);
+        }
+
+        .checkbox-row {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            margin-top: 2px;
+            cursor: pointer;
+        }
+
+        .checkbox-row input {
+            accent-color: var(--iris-accent);
+            cursor: pointer;
+        }
+
+        /* Live Panel: Sage Card with Nested Well */
+        .panel-sage {
+            background-color: var(--sage-bg);
+            border: 1px solid var(--sage-border);
+            color: var(--sage-text);
+            border-radius: var(--radius-card);
+            padding: 22px;
+            box-shadow: var(--elevation);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .sage-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.02em;
+            background: var(--surface-well);
+            padding: 4px 10px;
+            border-radius: var(--radius-pill);
+            border: 1px solid var(--border-well);
+        }
+
+        .pulse-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background-color: var(--sage-accent);
+            box-shadow: 0 0 8px var(--sage-accent);
+            animation: pulse-ring 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse-ring {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        /* Nested Inset Well inside Sage */
+        .nested-well {
+            background: var(--surface-well);
+            border: 1px solid var(--border-well);
+            border-radius: var(--radius-well);
+            padding: 16px 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            align-items: center;
+        }
+
+        @media (max-width: 640px) {
+            .nested-well {
+                grid-template-columns: 1fr 1fr;
             }
         }
 
-        .telemetry-metric {
-            background: var(--bg-well);
-            border: 1px solid var(--border-well);
-            border-radius: 10px;
-            padding: 8px 10px;
+        .metric-cell {
             display: flex;
             flex-direction: column;
             gap: 2px;
@@ -483,127 +570,190 @@
 
         .metric-label {
             font-family: var(--font-mono);
-            font-size: 10px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
+            font-size: 11px;
+            opacity: 0.7;
         }
 
         .metric-value {
             font-family: var(--font-mono);
-            font-size: 13px;
             font-weight: 600;
-            color: var(--text-primary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 16px;
+            letter-spacing: -0.02em;
         }
 
-        /* Queue List & Indexed Rows */
-        .queue-container {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .queue-header-actions {
+        .sage-action-row {
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
-        .queue-empty-well {
-            background: var(--bg-well);
-            border: 1px dashed var(--border-ui);
-            border-radius: 10px;
-            padding: 32px 20px;
-            text-align: center;
-            color: var(--text-muted);
+        .metadata-stamp {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-compile {
+            background: var(--sage-accent);
+            color: #062416;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 700;
+            padding: 10px 22px;
+            border-radius: var(--radius-control);
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 180ms ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-compile:hover:not(:disabled) {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        .btn-compile:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none;
+            filter: grayscale(0.5);
+        }
+
+        /* Success Download Banner inside Sage Card */
+        .download-ready-box {
+            display: none;
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px dashed var(--sage-accent);
+            border-radius: var(--radius-well);
+            padding: 14px 18px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .download-ready-box.active {
+            display: flex;
+        }
+
+        .download-ready-meta {
             font-family: var(--font-mono);
             font-size: 12px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             gap: 8px;
         }
 
-        .queue-row {
-            background: var(--bg-well);
+        .btn-download-direct {
+            background: var(--surface-well);
+            color: currentColor;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: var(--radius-control);
             border: 1px solid var(--border-well);
-            border-radius: 10px;
-            padding: 10px 14px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-download-direct:hover {
+            background: rgba(0, 0, 0, 0.25);
+            text-decoration: none;
+        }
+
+        /* 4. Indexed List: Numbered 01, 02 Rows */
+        .queue-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .queue-row {
+            background: var(--surface-card);
+            border: 1px solid var(--border-dim);
+            border-radius: var(--radius-card);
+            padding: 12px 16px;
+            box-shadow: var(--elevation-sm);
             display: flex;
             align-items: center;
-            gap: 12px;
-            transition: all var(--transition-smooth);
-            user-select: none;
-            position: relative;
+            justify-content: space-between;
+            gap: 16px;
+            transition: all 180ms ease;
         }
 
         .queue-row:hover {
-            border-color: var(--border-ui-hover);
-            background: var(--row-hover);
+            border-color: var(--border-focus);
+            background: var(--surface-card-hover);
         }
 
         .queue-row.dragging {
-            opacity: 0.35;
-            border: 1px dashed var(--text-muted);
+            opacity: 0.4;
+            border-style: dashed;
         }
 
-        .row-drag-handle {
-            cursor: grab;
-            color: var(--text-muted);
-            padding: 4px;
+        .queue-row.drag-over-row {
+            border-color: var(--iris-accent);
+            background: var(--surface-card-hover);
+        }
+
+        .row-left {
             display: flex;
             align-items: center;
-            justify-content: center;
-        }
-
-        .row-drag-handle:active {
-            cursor: grabbing;
+            gap: 14px;
+            min-width: 0;
+            flex: 1;
         }
 
         .row-index {
             font-family: var(--font-mono);
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             color: var(--text-muted);
-            width: 24px;
-            flex-shrink: 0;
+            min-width: 26px;
         }
 
-        .row-thumb-container {
-            width: 44px;
-            height: 44px;
+        .row-thumb-wrap {
+            width: 48px;
+            height: 48px;
             border-radius: 8px;
-            border: 1px solid var(--border-ui);
-            background: var(--code-bg);
             overflow: hidden;
+            background: var(--surface-well);
+            border: 1px solid var(--border-well);
             flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
+            cursor: pointer;
         }
 
         .row-thumb {
-            max-width: 100%;
-            max-height: 100%;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            transition: transform var(--transition-smooth);
+            transition: transform 200ms ease;
         }
 
-        .row-meta {
-            flex: 1;
+        .row-details {
             min-width: 0;
             display: flex;
             flex-direction: column;
             gap: 2px;
         }
 
-        .row-name {
+        .row-filename {
             font-family: var(--font-sans);
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             color: var(--text-primary);
             white-space: nowrap;
@@ -611,1071 +761,1153 @@
             text-overflow: ellipsis;
         }
 
-        .sub-branch {
+        .row-subbranch {
             font-family: var(--font-mono);
             font-size: 11px;
             color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        .row-subbranch span.branch-arrow {
+            color: var(--text-secondary);
         }
 
         .row-actions {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             flex-shrink: 0;
         }
 
-        .icon-btn {
-            width: 28px;
-            height: 28px;
+        .btn-row-action {
+            width: 32px;
+            height: 32px;
             border-radius: 8px;
-            border: 1px solid var(--border-ui);
-            background: transparent;
+            background: var(--surface-well);
+            border: 1px solid var(--border-well);
             color: var(--text-secondary);
-            cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: all var(--transition-smooth);
+            cursor: pointer;
+            transition: all 150ms ease;
         }
 
-        .icon-btn:hover {
+        .btn-row-action:hover:not(:disabled) {
             color: var(--text-primary);
-            border-color: var(--border-ui-hover);
-            background: var(--code-bg);
-            transform: translateY(-1px);
+            border-color: var(--border-focus);
+            background: var(--icon-tint-bg);
         }
 
-        .icon-btn.danger:hover {
+        .btn-row-action:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn-row-delete:hover:not(:disabled) {
             color: #EF4444;
             border-color: rgba(239, 68, 68, 0.4);
             background: rgba(239, 68, 68, 0.1);
         }
 
-        .icon-btn svg {
-            width: 14px;
-            height: 14px;
-            stroke-width: 1.75;
-            stroke: currentColor;
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        /* macOS Popover Dialog: ⌘K Settings */
-        .popover-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            z-index: 99;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity var(--transition-smooth);
-        }
-
-        .popover-backdrop.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .popover-card {
-            width: 100%;
-            max-width: 520px;
-            max-height: 90vh;
-            overflow-y: auto;
-            border-radius: 16px;
-            background: var(--bg-sticky);
-            backdrop-filter: blur(20px) saturate(160%);
-            -webkit-backdrop-filter: blur(20px) saturate(160%);
-            border: 1px solid var(--border-ui);
-            box-shadow: var(--popover-shadow);
-            padding: 20px;
+        /* Empty State */
+        .empty-craft-state {
+            background: var(--surface-card);
+            border: 1px dashed var(--border-dim);
+            border-radius: var(--radius-card);
+            padding: 44px 20px;
+            text-align: center;
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            transform: scale(0.97) translateY(8px);
-            transition: transform var(--transition-smooth);
-        }
-
-        .popover-backdrop.active .popover-card {
-            transform: scale(1) translateY(0);
-        }
-
-        .popover-header {
-            display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding-bottom: 12px;
-            border-bottom: 1px dashed var(--border-ui);
+            gap: 10px;
         }
 
-        .popover-title {
-            font-family: var(--font-mono);
-            font-size: 12px;
-            color: var(--text-primary);
-            font-weight: 500;
-        }
-
-        .dashed-divider {
-            height: 1px;
-            border: none;
-            border-top: 1px dashed var(--border-ui);
-            margin: 2px 0;
-        }
-
-        .settings-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .settings-label-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .settings-label {
+        .empty-craft-title {
             font-family: var(--font-sans);
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 600;
             color: var(--text-primary);
         }
 
-        .settings-hint {
-            font-family: var(--font-mono);
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        .text-input {
-            width: 100%;
+        .empty-craft-sub {
             font-family: var(--font-mono);
             font-size: 12px;
-            color: var(--text-primary);
-            background: var(--bg-well);
-            border: 1px solid var(--border-well);
-            border-radius: 8px;
-            padding: 8px 12px;
-            outline: none;
-            transition: border-color var(--transition-smooth);
-        }
-
-        .text-input:focus {
-            border-color: var(--border-ui-hover);
-        }
-
-        .segmented-group {
-            display: flex;
-            background: var(--bg-well);
-            border: 1px solid var(--border-well);
-            border-radius: 8px;
-            padding: 3px;
-            gap: 3px;
-        }
-
-        .segmented-btn {
-            flex: 1;
-            font-family: var(--font-mono);
-            font-size: 11px;
-            font-weight: 500;
             color: var(--text-muted);
-            background: transparent;
-            border: none;
-            border-radius: 6px;
-            padding: 6px 8px;
-            cursor: pointer;
-            text-align: center;
-            transition: all var(--transition-smooth);
-            user-select: none;
+            max-width: 360px;
         }
 
-        .segmented-btn.active {
-            color: var(--text-primary);
-            background: var(--bg-sticky);
-            border: 1px solid var(--border-ui);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .slider-control {
-            -webkit-appearance: none;
-            appearance: none;
+        /* 5. Footer: Mono Metadata & Link Row */
+        footer.craft-footer {
+            max-width: 1000px;
             width: 100%;
-            height: 4px;
-            background: var(--border-ui);
-            border-radius: 4px;
-            outline: none;
-            margin: 6px 0;
-        }
-
-        .slider-control::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 14px;
-            height: 14px;
-            border-radius: 5px;
-            background: var(--text-primary);
-            cursor: pointer;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .popover-footer {
-            font-family: var(--font-mono);
-            font-size: 11px;
-            color: var(--text-muted);
+            margin: 0 auto;
+            padding: 24px 20px 48px;
+            border-top: 1px solid var(--border-dim);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding-top: 8px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
-        /* Compiling Progress Overlay */
-        .progress-indicator {
-            display: none;
-            background: var(--bg-well);
-            border: 1px solid var(--border-well);
-            border-radius: 10px;
-            padding: 12px 16px;
-            margin-top: 8px;
-            flex-direction: column;
-            gap: 8px;
+        .footer-meta {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: -0.01em;
         }
 
-        .progress-indicator.active {
+        .footer-links {
             display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .footer-link {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-decoration: underline dotted;
+            text-underline-offset: 4px;
+        }
+
+        .footer-link:hover {
+            color: var(--text-primary);
+        }
+
+        /* Command Palette Dialog (Cmd/Ctrl + K) */
+        .palette-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 80px 20px 20px;
+        }
+
+        .palette-backdrop.active {
+            display: flex;
+        }
+
+        .palette-dialog {
+            width: 100%;
+            max-width: 540px;
+            background: var(--surface-solid);
+            border: 1px solid var(--border-dim);
+            border-radius: var(--radius-dialog);
+            box-shadow: var(--elevation);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: paletteIn 180ms var(--ease-craft);
+        }
+
+        @keyframes paletteIn {
+            from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .palette-search-wrap {
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px dashed var(--border-dim);
+        }
+
+        .palette-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-family: var(--font-sans);
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+
+        .palette-input::placeholder {
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: 13px;
+        }
+
+        .palette-segment {
+            padding: 10px 18px;
+            background: var(--surface-well);
+            border-bottom: 1px dashed var(--border-dim);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .palette-list {
+            max-height: 280px;
+            overflow-y: auto;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .palette-item {
+            padding: 10px 12px;
+            border-radius: var(--radius-control);
+            font-family: var(--font-sans);
+            font-size: 13px;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 120ms ease;
+        }
+
+        .palette-item:hover,
+        .palette-item.selected {
+            background: var(--icon-tint-bg);
+        }
+
+        .palette-item-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .palette-item kbd {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-muted);
+            border: 1px solid var(--border-dim);
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        /* Lightbox Dialog */
+        .lightbox-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 120;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(14px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .lightbox-backdrop.active {
+            display: flex;
+        }
+
+        .lightbox-dialog {
+            max-width: 90vw;
+            max-height: 90vh;
+            border-radius: var(--radius-dialog);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox-img {
+            max-width: 100%;
+            max-height: 82vh;
+            border-radius: var(--radius-well);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            transition: transform 200ms ease;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -16px;
+            right: -16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--surface-solid);
+            border: 1px solid var(--border-dim);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        /* Progress Modal */
+        .progress-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 110;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .progress-backdrop.active {
+            display: flex;
+        }
+
+        .progress-card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--surface-solid);
+            border: 1px solid var(--border-dim);
+            border-radius: var(--radius-dialog);
+            padding: 28px;
+            box-shadow: var(--elevation);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            text-align: center;
         }
 
         .progress-bar-track {
             width: 100%;
-            height: 4px;
-            background: var(--border-ui);
-            border-radius: 4px;
+            height: 6px;
+            background: var(--surface-well);
+            border-radius: var(--radius-pill);
             overflow: hidden;
+            margin-top: 4px;
         }
 
         .progress-bar-fill {
-            width: 0%;
             height: 100%;
-            background: var(--bento-plum-text);
-            transition: width 100ms ease;
+            width: 0%;
+            background: var(--sage-accent);
+            border-radius: var(--radius-pill);
+            transition: width 150ms ease;
         }
 
-        .progress-status-text {
-            font-family: var(--font-mono);
-            font-size: 11px;
-            color: var(--text-secondary);
-        }
-
-        /* Success Banner */
-        .export-success-well {
+        /* Mobile Floating Pill Nav */
+        .mobile-pill-nav {
             display: none;
-            background: var(--bento-emerald-bg);
-            border: 1px solid var(--bento-emerald-border);
-            border-radius: 10px;
-            padding: 14px 16px;
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 54px;
+            background: var(--surface-float);
+            backdrop-filter: blur(18px) saturate(160%);
+            -webkit-backdrop-filter: blur(18px) saturate(160%);
+            border: 1px solid var(--border-dim);
+            border-radius: var(--radius-pill);
+            box-shadow: var(--elevation);
+            padding: 0 16px;
             align-items: center;
-            justify-content: space-between;
-            color: var(--bento-emerald-text);
+            gap: 16px;
+            z-index: 40;
         }
 
-        .export-success-well.active {
-            display: flex;
+        @media (max-width: 780px) {
+            .mobile-pill-nav {
+                display: flex;
+            }
+            .workspace-spine {
+                padding-bottom: 96px;
+            }
         }
 
-        .export-details {
-            font-family: var(--font-mono);
-            font-size: 12px;
-            line-height: 1.4;
-        }
-
-        /* Footer */
-        .page-footer {
-            margin-top: 24px;
-            text-align: center;
+        .pill-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
             font-family: var(--font-mono);
             font-size: 11px;
-            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 10px;
+            border-radius: var(--radius-pill);
+        }
+
+        .pill-btn:hover,
+        .pill-btn.active {
+            color: var(--text-primary);
+            background: var(--icon-tint-bg);
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
         }
     </style>
 </head>
 <body>
 
-    <!-- Top Sticky Bar -->
-    <header class="sticky-bar">
-        <div class="sticky-bar-inner">
-            <a href="#" class="breadcrumb" title="ghost tactile workspace">
-                <span>~/ghost/image-to-pdf</span>
-                <span class="breadcrumb-cursor"></span>
-            </a>
+    <!-- 1. Top Bar -->
+    <header class="top-bar">
+        <div class="top-bar-inner">
+            <div class="breadcrumb">
+                <span class="root">~/shapedinto</span>
+                <span class="sep">/</span>
+                <span class="current">image-to-pdf</span>
+            </div>
 
-            <div class="nav-actions">
-                <span class="telemetry-chip" id="topTelemetryBadge">
-                    <span class="pulse-dot"></span>
-                    <span id="badgeQueueText">idle queue</span>
-                </span>
+            <nav class="top-anchors" aria-label="Quick anchors">
+                <a class="anchor-link" href="#import">queue</a>
+                <a class="anchor-link" href="#specs">specs</a>
+                <a class="anchor-link" href="#compiler">compiler</a>
+            </nav>
 
-                <button type="button" class="btn-tactile" id="openSettingsBtn" title="preferences (⌘K)">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                    </svg>
-                    <span>prefs</span>
+            <div class="top-actions">
+                <button id="cmdPaletteBtn" class="btn-ghost" aria-label="Open command palette">
+                    <span>palette</span>
                     <kbd>⌘K</kbd>
                 </button>
-
-                <button type="button" class="btn-tactile" id="themeToggleBtn" title="toggle theme">
-                    <svg id="themeIconDark" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg>
-                    <svg id="themeIconLight" style="display:none;" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
+                <button id="themeToggleBtn" class="btn-ghost" aria-label="Toggle theme">
+                    <span id="themeLabelText">paper</span>
+                    <span>→</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Viewport Spine (660px max-width) -->
-    <main class="viewport-spine">
+    <!-- Main Workspace Spine -->
+    <main class="workspace-spine">
 
-        <!-- Tilted Bento Pair (Amber & Plum) -->
-        <section class="bento-grid">
-            <!-- Left: Amber Dropzone (rotate -1.15deg) -->
-            <div class="bento-card bento-amber" id="dropzoneCard" role="button" tabindex="0">
-                <input type="file" id="filePickerInput" multiple accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml,image/bmp" style="display: none;">
-                <div class="bento-top-row">
-                    <div>
-                        <div class="bento-card-title">source images</div>
-                        <span class="bento-script">*(drag or pick)*</span>
+        <!-- 2. Highlight Pair: Sand (Import) and Iris (Specs) -->
+        <section id="specs" class="highlight-grid">
+
+            <!-- Sand Highlight Card (Tilted Left) -->
+            <article class="tilted-card card-sand">
+                <div class="card-topline">
+                    <span class="card-label">
+                        <span class="glyph-container" style="width:24px;height:24px;border-radius:6px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                        </span>
+                        import queue
+                    </span>
+                    <span class="card-script-tag">(drop files or browse)</span>
+                </div>
+
+                <div id="dropzone" class="dropzone-box" tabindex="0" role="button" aria-label="Upload images dropzone">
+                    <div class="glyph-container">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
                     </div>
-                    <div class="icon-box">
-                        <svg viewBox="0 0 24 24">
+                    <div class="dropzone-title">Select images or drop anywhere</div>
+                    <div class="dropzone-sub">PNG · JPG · WEBP · GIF · SVG · BMP</div>
+                    <input type="file" id="imageInput" multiple accept="image/*" class="sr-only">
+                </div>
+
+                <div class="quick-actions-bar">
+                    <button id="sortNameBtn" class="btn-tiny-tool" disabled title="Sort images alphanumerically">
+                        <span>sort name</span>
+                    </button>
+                    <button id="reverseBtn" class="btn-tiny-tool" disabled title="Reverse list order">
+                        <span>reverse</span>
+                    </button>
+                    <button id="rotateAllBtn" class="btn-tiny-tool" disabled title="Rotate all 90° clockwise">
+                        <span>rotate all 90°</span>
+                    </button>
+                    <button id="clearAllBtn" class="btn-tiny-tool" disabled title="Clear all images">
+                        <span>clear queue</span>
+                    </button>
+                </div>
+            </article>
+
+            <!-- Iris Highlight Card (Tilted Right) -->
+            <article class="tilted-card card-iris">
+                <div class="card-topline">
+                    <span class="card-label">
+                        <span class="glyph-container" style="width:24px;height:24px;border-radius:6px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                            </svg>
+                        </span>
+                        document specs
+                    </span>
+                    <span class="card-script-tag">(layout &amp; margins)</span>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="control-group">
+                        <label class="control-label" for="pageSize">page size</label>
+                        <select id="pageSize" class="craft-select">
+                            <option value="a4" selected>A4 (210 × 297 mm)</option>
+                            <option value="letter">Letter (8.5 × 11 in)</option>
+                            <option value="legal">Legal (8.5 × 14 in)</option>
+                            <option value="a3">A3 (297 × 420 mm)</option>
+                            <option value="a5">A5 (148 × 210 mm)</option>
+                            <option value="fit">Fit to Image (No Borders)</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="orientation">orientation</label>
+                        <select id="orientation" class="craft-select">
+                            <option value="auto" selected>auto (per image)</option>
+                            <option value="portrait">portrait</option>
+                            <option value="landscape">landscape</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="marginPreset">page margin</label>
+                        <select id="marginPreset" class="craft-select">
+                            <option value="0">none (0 mm)</option>
+                            <option value="5">small (5 mm)</option>
+                            <option value="10" selected>standard (10 mm)</option>
+                            <option value="20">large (20 mm)</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="layoutMode">scaling mode</label>
+                        <select id="layoutMode" class="craft-select">
+                            <option value="contain" selected>contain (full image)</option>
+                            <option value="cover">cover (fill page)</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="quality">compression</label>
+                        <select id="quality" class="craft-select">
+                            <option value="0.95">high quality (0.95)</option>
+                            <option value="0.85" selected>balanced (0.85)</option>
+                            <option value="0.70">compact (0.70)</option>
+                            <option value="0.50">minimal (0.50)</option>
+                        </select>
+                    </div>
+
+                    <!-- PDF Author Name Input with 'Your name' placeholder, updates live -->
+                    <div class="control-group">
+                        <label class="control-label" for="authorName">author name</label>
+                        <input id="authorName" type="text" class="craft-input" placeholder="Your name">
+                    </div>
+
+                    <label class="checkbox-row">
+                        <input id="addPageNumbers" type="checkbox">
+                        <span>include page numbers in footer</span>
+                    </label>
+                </div>
+            </article>
+
+        </section>
+
+        <!-- 3. Live Panel: Sage Card with Nested Well -->
+        <section id="compiler" class="panel-sage">
+            <div class="sage-topbar">
+                <div class="status-pill">
+                    <span class="pulse-dot"></span>
+                    <span id="compilerStateLabel">compiler ready</span>
+                </div>
+                <div class="metadata-stamp">
+                    <span>operator:</span>
+                    <strong id="liveAuthorStamp" style="color:currentColor;">Your name</strong>
+                </div>
+            </div>
+
+            <!-- Nested Well: Key Metrics -->
+            <div class="nested-well">
+                <div class="metric-cell">
+                    <span class="metric-label">pages</span>
+                    <span id="metricPages" class="metric-value">0</span>
+                </div>
+                <div class="metric-cell">
+                    <span class="metric-label">queue payload</span>
+                    <span id="metricPayload" class="metric-value">0 KB</span>
+                </div>
+                <div class="metric-cell">
+                    <span class="metric-label">page profile</span>
+                    <span id="metricProfile" class="metric-value">A4 · auto</span>
+                </div>
+                <div class="metric-cell">
+                    <span class="metric-label">output target</span>
+                    <span id="metricFile" class="metric-value">document.pdf</span>
+                </div>
+            </div>
+
+            <!-- Download Ready Box (shows after generation) -->
+            <div id="downloadReadyBox" class="download-ready-box">
+                <div class="download-ready-meta">
+                    <span class="pulse-dot"></span>
+                    <span id="downloadMetaText">compiled 0 pages · ready</span>
+                </div>
+                <a id="downloadDirectLink" href="#" class="btn-download-direct" download>
+                    <span>download pdf</span>
+                    <span>→</span>
+                </a>
+            </div>
+
+            <div class="sage-action-row">
+                <div class="control-group" style="flex:1; max-width: 320px;">
+                    <label class="control-label" for="pdfFileName">output file name</label>
+                    <input id="pdfFileName" type="text" class="craft-input" placeholder="document.pdf">
+                </div>
+
+                <button id="generatePdfBtn" class="btn-compile" disabled>
+                    <span class="glyph-container" style="width:20px;height:20px;background:rgba(0,0,0,0.12);border-radius:4px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </span>
+                    <span>compile pdf</span>
+                    <span>→</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 4. Indexed List: Numbered 01, 02 Rows -->
+        <section id="import">
+            <div class="section-header">
+                <h2 class="section-title">page sequence</h2>
+                <span class="side-note">*(drag or step to order)*</span>
+            </div>
+
+            <div id="queueList" class="queue-container" aria-label="Page sequence list">
+                <!-- Empty State -->
+                <div class="empty-craft-state">
+                    <div class="glyph-container" style="width:44px;height:44px;border-radius:12px;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                             <circle cx="8.5" cy="8.5" r="1.5"></circle>
                             <polyline points="21 15 16 10 5 21"></polyline>
                         </svg>
                     </div>
-                </div>
-                <div class="bento-subtext">
-                    png, jpg, webp, svg, bmp · memory only
-                </div>
-            </div>
-
-            <!-- Right: Plum Compile Button (rotate 1.05deg) -->
-            <div class="bento-card bento-plum disabled" id="compilePdfBtn" role="button" tabindex="0">
-                <div class="bento-top-row">
-                    <div>
-                        <div class="bento-card-title">compile document</div>
-                        <span class="bento-script">*(instant export)*</span>
-                    </div>
-                    <div class="icon-box">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="12" y1="18" x2="12" y2="12"></line>
-                            <line x1="9" y1="15" x2="12" y2="18"></line>
-                            <line x1="15" y1="15" x2="12" y2="18"></line>
-                        </svg>
-                    </div>
-                </div>
-                <div class="bento-subtext" id="compileSubtext">
-                    queue empty · add images first
+                    <div class="empty-craft-title">no images queued yet</div>
+                    <p class="empty-craft-sub">drop files onto the import card above or paste from clipboard to arrange your document.</p>
                 </div>
             </div>
         </section>
-
-        <!-- Progress Indicator -->
-        <div class="progress-indicator" id="compileProgressWell">
-            <div class="progress-status-text" id="compileProgressText">↳ compiling page 1 of 1...</div>
-            <div class="progress-bar-track">
-                <div class="progress-bar-fill" id="compileProgressBarFill"></div>
-            </div>
-        </div>
-
-        <!-- Export Success Well -->
-        <div class="export-success-well" id="exportSuccessWell">
-            <div>
-                <div style="font-family: var(--font-sans); font-weight: 700; font-size: 14px;">export compiled</div>
-                <div class="export-details" id="exportDetailsText">↳ document ready</div>
-            </div>
-            <a class="btn-tactile wavy-link" id="downloadAgainLink" href="#" download="ghost-document.pdf">
-                <span>save again ↗</span>
-            </a>
-        </div>
-
-        <!-- Emerald Nested Well Card: Primary Live Status & Telemetry -->
-        <section class="emerald-well">
-            <div class="emerald-well-header">
-                <div class="emerald-well-title-group">
-                    <span class="pulse-dot"></span>
-                    <strong style="font-family: var(--font-sans); font-size: 14px; letter-spacing: -0.02em;">telemetry</strong>
-                    <span class="script-note" style="font-size: 19px;">*(live state)*</span>
-                </div>
-                <span style="font-family: var(--font-mono); font-size: 11px; opacity: 0.8;" id="activeProfileLabel">A4 · portrait</span>
-            </div>
-
-            <div class="telemetry-grid">
-                <div class="telemetry-metric">
-                    <span class="metric-label">pages</span>
-                    <span class="metric-value" id="metricPages">0</span>
-                </div>
-                <div class="telemetry-metric">
-                    <span class="metric-label">payload</span>
-                    <span class="metric-value" id="metricPayload">0 kb</span>
-                </div>
-                <div class="telemetry-metric">
-                    <span class="metric-label">compression</span>
-                    <span class="metric-value" id="metricCompression">85%</span>
-                </div>
-                <div class="telemetry-metric">
-                    <span class="metric-label">author</span>
-                    <span class="metric-value" id="metricAuthor">Ghost</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Indexed 01. + ↳ Rows: Image Queue Section -->
-        <section class="queue-container">
-            <div class="section-header">
-                <div>
-                    <span class="section-title">queue</span>
-                    <span class="script-note">*(page order)*</span>
-                </div>
-                <div class="queue-header-actions">
-                    <button type="button" class="btn-tactile" id="addSampleBtn" title="load sample image sequence">
-                        <span>+ sample sequence</span>
-                    </button>
-                    <button type="button" class="btn-tactile" id="clearQueueBtn" style="display:none;" title="clear queue">
-                        <span>clear</span>
-                    </button>
-                </div>
-            </div>
-
-            <div id="queueList">
-                <!-- Empty state -->
-                <div class="queue-empty-well" id="queueEmptyWell">
-                    <div style="font-family: var(--font-script); font-size: 24px; color: var(--text-secondary);">no images in buffer</div>
-                    <div>↳ drop files above or click to pick images</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="page-footer">
-            <div>~/ghost/image-to-pdf · client memory compilation · zero analytics</div>
-        </footer>
 
     </main>
 
-    <!-- macOS Popover Dialog: Preferences (⌘K) -->
-    <div class="popover-backdrop" id="popoverBackdrop" role="dialog" aria-modal="true">
-        <div class="popover-card">
-            <div class="popover-header">
-                <div class="popover-title">~/ghost/image-to-pdf :: preferences</div>
-                <button type="button" class="icon-btn" id="closeSettingsBtn" title="close (esc)">
-                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
+    <!-- 5. Footer: Mono metadata line & links -->
+    <footer class="craft-footer">
+        <div class="footer-meta">
+            <span>client-side rendering · jspdf 2.5.1 · zero network telemetry</span>
+        </div>
+        <div class="footer-links">
+            <a class="footer-link" href="#import">top ↗</a>
+            <a class="footer-link" href="https://github.com/harik90/IMAGE_TO_PDF" target="_blank" rel="noopener">upstream repository ↗</a>
+        </div>
+    </footer>
+
+    <!-- Mobile Floating Pill Navigation -->
+    <nav class="mobile-pill-nav" aria-label="Quick mobile actions">
+        <button id="mobileUploadBtn" class="pill-btn">
+            <span>import</span>
+            <span>+</span>
+        </button>
+        <button id="mobileCompileBtn" class="pill-btn" disabled>
+            <span>compile</span>
+            <span>→</span>
+        </button>
+        <button id="mobileThemeBtn" class="pill-btn">
+            <span>theme</span>
+        </button>
+    </nav>
+
+    <!-- Command Palette Dialog (Cmd/Ctrl + K) -->
+    <div id="paletteBackdrop" class="palette-backdrop" role="dialog" aria-modal="true" aria-label="Command palette">
+        <div class="palette-dialog">
+            <div class="palette-search-wrap">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted);">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input id="paletteInput" type="text" class="palette-input" placeholder="type a command or search action..." autocomplete="off">
+                <kbd style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">esc</kbd>
             </div>
-
-            <!-- Author & Identity Rule: Ghost fallback, "John Doe" placeholder hint -->
-            <div class="settings-group">
-                <div class="settings-label-row">
-                    <label class="settings-label" for="pdfAuthorInput">document author</label>
-                    <span class="settings-hint">pdf metadata header</span>
-                </div>
-                <input type="text" id="pdfAuthorInput" class="text-input" placeholder="John Doe" value="Ghost">
+            <div class="palette-segment">
+                <span>studio actions</span>
+                <span>navigation</span>
             </div>
-
-            <div class="settings-group">
-                <div class="settings-label-row">
-                    <label class="settings-label" for="pdfTitleInput">file name</label>
-                    <span class="settings-hint">output identifier</span>
+            <div id="paletteList" class="palette-list">
+                <div class="palette-item" data-action="upload">
+                    <div class="palette-item-left">
+                        <span>add image files</span>
+                    </div>
+                    <kbd>O</kbd>
                 </div>
-                <input type="text" id="pdfTitleInput" class="text-input" value="ghost-document.pdf">
-            </div>
-
-            <hr class="dashed-divider">
-
-            <!-- Page Size -->
-            <div class="settings-group">
-                <div class="settings-label-row">
-                    <span class="settings-label">page format</span>
-                    <span class="settings-hint">physical size</span>
+                <div class="palette-item" data-action="compile">
+                    <div class="palette-item-left">
+                        <span>compile pdf document</span>
+                    </div>
+                    <kbd>↵</kbd>
                 </div>
-                <div class="segmented-group" id="pageSizeSegments">
-                    <button type="button" class="segmented-btn active" data-val="a4">A4</button>
-                    <button type="button" class="segmented-btn" data-val="letter">Letter</button>
-                    <button type="button" class="segmented-btn" data-val="legal">Legal</button>
-                    <button type="button" class="segmented-btn" data-val="a3">A3</button>
-                    <button type="button" class="segmented-btn" data-val="fit">Fit</button>
+                <div class="palette-item" data-action="theme">
+                    <div class="palette-item-left">
+                        <span>toggle theme (ink / paper)</span>
+                    </div>
+                    <kbd>T</kbd>
                 </div>
-            </div>
-
-            <!-- Page Orientation -->
-            <div class="settings-group">
-                <div class="settings-label-row">
-                    <span class="settings-label">orientation</span>
-                    <span class="settings-hint">document aspect</span>
+                <div class="palette-item" data-action="sort">
+                    <div class="palette-item-left">
+                        <span>sort pages by name</span>
+                    </div>
+                    <kbd>S</kbd>
                 </div>
-                <div class="segmented-group" id="orientationSegments">
-                    <button type="button" class="segmented-btn active" data-val="portrait">Portrait</button>
-                    <button type="button" class="segmented-btn" data-val="landscape">Landscape</button>
-                    <button type="button" class="segmented-btn" data-val="auto">Auto</button>
+                <div class="palette-item" data-action="reverse">
+                    <div class="palette-item-left">
+                        <span>reverse page sequence</span>
+                    </div>
+                    <kbd>R</kbd>
                 </div>
-            </div>
-
-            <!-- Margin Presets -->
-            <div class="settings-group">
-                <div class="settings-label-row">
-                    <span class="settings-label">margin</span>
-                    <span class="settings-hint">page border inset</span>
+                <div class="palette-item" data-action="rotate-all">
+                    <div class="palette-item-left">
+                        <span>rotate all pages 90°</span>
+                    </div>
+                    <kbd>W</kbd>
                 </div>
-                <div class="segmented-group" id="marginSegments">
-                    <button type="button" class="segmented-btn" data-val="0">None</button>
-                    <button type="button" class="segmented-btn" data-val="6">6mm</button>
-                    <button type="button" class="segmented-btn active" data-val="12">12mm</button>
-                    <button type="button" class="segmented-btn" data-val="20">20mm</button>
+                <div class="palette-item" data-action="clear">
+                    <div class="palette-item-left">
+                        <span>clear entire queue</span>
+                    </div>
+                    <kbd>C</kbd>
                 </div>
-            </div>
-
-            <!-- Image Fit Mode -->
-            <div class="settings-group">
-                <div class="settings-label-row">
-                    <span class="settings-label">scaling mode</span>
-                    <span class="settings-hint">aspect ratio behavior</span>
-                </div>
-                <div class="segmented-group" id="fitSegments">
-                    <button type="button" class="segmented-btn active" data-val="contain">Contain (Fit)</button>
-                    <button type="button" class="segmented-btn" data-val="cover">Cover (Fill)</button>
-                </div>
-            </div>
-
-            <hr class="dashed-divider">
-
-            <!-- Compression Quality -->
-            <div class="settings-group">
-                <div class="settings-label-row">
-                    <label class="settings-label" for="qualitySlider">jpeg compression</label>
-                    <span class="settings-hint" id="qualityLabel">85% (Balanced High)</span>
-                </div>
-                <input type="range" class="slider-control" id="qualitySlider" min="0.2" max="1.0" step="0.05" value="0.85">
-            </div>
-
-            <!-- Page numbering -->
-            <div class="settings-group">
-                <div class="settings-label-row" style="cursor: pointer;" id="toggleNumberingRow">
-                    <span class="settings-label">page numbering</span>
-                    <input type="checkbox" id="addPageNumbersCheckbox" style="accent-color: var(--text-primary); cursor: pointer;">
-                </div>
-            </div>
-
-            <div class="popover-footer">
-                <span>press <kbd style="font-family: var(--font-mono); background: var(--code-bg); padding: 1px 4px; border-radius: 4px;">esc</kbd> to dismiss</span>
-                <span class="wavy-link" id="resetPreferencesLink">reset defaults</span>
             </div>
         </div>
     </div>
 
-    <!-- Application Script -->
+    <!-- Lightbox Modal -->
+    <div id="lightboxBackdrop" class="lightbox-backdrop" role="dialog" aria-modal="true" aria-label="Page preview lightbox">
+        <div class="lightbox-dialog">
+            <button id="lightboxCloseBtn" class="lightbox-close" aria-label="Close preview">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <img id="lightboxImg" class="lightbox-img" src="" alt="Full page inspection">
+        </div>
+    </div>
+
+    <!-- Progress Compilation Modal -->
+    <div id="progressBackdrop" class="progress-backdrop" role="dialog" aria-modal="true">
+        <div class="progress-card">
+            <div style="font-family:var(--font-sans);font-weight:700;font-size:16px;">compiling document...</div>
+            <div id="progressStatusText" style="font-family:var(--font-mono);font-size:12px;color:var(--text-muted);">processing page 1...</div>
+            <div class="progress-bar-track">
+                <div id="progressBarFill" class="progress-bar-fill"></div>
+            </div>
+            <div id="progressSubtext" style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);opacity:0.8;">rendering canvas...</div>
+        </div>
+    </div>
+
     <script>
         (function () {
             'use strict';
 
             // State
-            const state = {
-                items: [],
-                pageSize: 'a4',
-                orientation: 'portrait',
-                margin: 12,
-                layoutMode: 'contain',
-                quality: 0.85,
-                addPageNumbers: false,
-                author: 'Ghost',
-                title: 'ghost-document.pdf',
-                theme: localStorage.getItem('ghost-theme') || 'dark',
-                draggedIndex: null,
-                isCompiling: false
-            };
+            let imageList = [];
+            let isProcessing = false;
+            let draggedIndex = null;
 
-            // DOM elements
-            const htmlEl = document.documentElement;
-            const dropzoneCard = document.getElementById('dropzoneCard');
-            const filePickerInput = document.getElementById('filePickerInput');
-            const compilePdfBtn = document.getElementById('compilePdfBtn');
-            const compileSubtext = document.getElementById('compileSubtext');
+            // DOM References
+            const dropzone = document.getElementById('dropzone');
+            const imageInput = document.getElementById('imageInput');
             const queueList = document.getElementById('queueList');
-            const queueEmptyWell = document.getElementById('queueEmptyWell');
-            const clearQueueBtn = document.getElementById('clearQueueBtn');
-            const addSampleBtn = document.getElementById('addSampleBtn');
-            const topTelemetryBadge = document.getElementById('topTelemetryBadge');
-            const badgeQueueText = document.getElementById('badgeQueueText');
-            const activeProfileLabel = document.getElementById('activeProfileLabel');
+            const sortNameBtn = document.getElementById('sortNameBtn');
+            const reverseBtn = document.getElementById('reverseBtn');
+            const rotateAllBtn = document.getElementById('rotateAllBtn');
+            const clearAllBtn = document.getElementById('clearAllBtn');
+
+            const pageSizeSelect = document.getElementById('pageSize');
+            const orientationSelect = document.getElementById('orientation');
+            const marginSelect = document.getElementById('marginPreset');
+            const layoutModeSelect = document.getElementById('layoutMode');
+            const qualitySelect = document.getElementById('quality');
+            const authorNameInput = document.getElementById('authorName');
+            const addPageNumbersCheckbox = document.getElementById('addPageNumbers');
+            const pdfFileNameInput = document.getElementById('pdfFileName');
+
+            const liveAuthorStamp = document.getElementById('liveAuthorStamp');
+            const compilerStateLabel = document.getElementById('compilerStateLabel');
             const metricPages = document.getElementById('metricPages');
             const metricPayload = document.getElementById('metricPayload');
-            const metricCompression = document.getElementById('metricCompression');
-            const metricAuthor = document.getElementById('metricAuthor');
+            const metricProfile = document.getElementById('metricProfile');
+            const metricFile = document.getElementById('metricFile');
+
+            const generatePdfBtn = document.getElementById('generatePdfBtn');
+            const downloadReadyBox = document.getElementById('downloadReadyBox');
+            const downloadMetaText = document.getElementById('downloadMetaText');
+            const downloadDirectLink = document.getElementById('downloadDirectLink');
+
             const themeToggleBtn = document.getElementById('themeToggleBtn');
-            const themeIconDark = document.getElementById('themeIconDark');
-            const themeIconLight = document.getElementById('themeIconLight');
+            const themeLabelText = document.getElementById('themeLabelText');
+            const mobileThemeBtn = document.getElementById('mobileThemeBtn');
+            const mobileUploadBtn = document.getElementById('mobileUploadBtn');
+            const mobileCompileBtn = document.getElementById('mobileCompileBtn');
 
-            // Popover elements
-            const openSettingsBtn = document.getElementById('openSettingsBtn');
-            const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-            const popoverBackdrop = document.getElementById('popoverBackdrop');
-            const pdfAuthorInput = document.getElementById('pdfAuthorInput');
-            const pdfTitleInput = document.getElementById('pdfTitleInput');
-            const qualitySlider = document.getElementById('qualitySlider');
-            const qualityLabel = document.getElementById('qualityLabel');
-            const addPageNumbersCheckbox = document.getElementById('addPageNumbersCheckbox');
-            const resetPreferencesLink = document.getElementById('resetPreferencesLink');
+            const cmdPaletteBtn = document.getElementById('cmdPaletteBtn');
+            const paletteBackdrop = document.getElementById('paletteBackdrop');
+            const paletteInput = document.getElementById('paletteInput');
+            const paletteList = document.getElementById('paletteList');
 
-            // Progress & Export elements
-            const compileProgressWell = document.getElementById('compileProgressWell');
-            const compileProgressText = document.getElementById('compileProgressText');
-            const compileProgressBarFill = document.getElementById('compileProgressBarFill');
-            const exportSuccessWell = document.getElementById('exportSuccessWell');
-            const exportDetailsText = document.getElementById('exportDetailsText');
-            const downloadAgainLink = document.getElementById('downloadAgainLink');
+            const lightboxBackdrop = document.getElementById('lightboxBackdrop');
+            const lightboxImg = document.getElementById('lightboxImg');
+            const lightboxCloseBtn = document.getElementById('lightboxCloseBtn');
 
-            // Set initial theme
-            applyTheme(state.theme);
+            const progressBackdrop = document.getElementById('progressBackdrop');
+            const progressBarFill = document.getElementById('progressBarFill');
+            const progressStatusText = document.getElementById('progressStatusText');
+            const progressSubtext = document.getElementById('progressSubtext');
 
-            function applyTheme(theme) {
-                state.theme = theme;
-                htmlEl.setAttribute('data-theme', theme);
-                localStorage.setItem('ghost-theme', theme);
+            // Format bytes helper
+            function formatBytes(bytes) {
+                if (bytes === 0) return '0 KB';
+                const k = 1024;
+                const sizes = ['B', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+            }
+
+            // Theme Management
+            function initTheme() {
+                const savedTheme = localStorage.getItem('quiet_craft_theme') || 
+                    (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+                setTheme(savedTheme);
+            }
+
+            function setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('quiet_craft_theme', theme);
                 if (theme === 'dark') {
-                    themeIconDark.style.display = 'inline-block';
-                    themeIconLight.style.display = 'none';
+                    themeLabelText.textContent = 'paper';
                 } else {
-                    themeIconDark.style.display = 'none';
-                    themeIconLight.style.display = 'inline-block';
+                    themeLabelText.textContent = 'ink';
                 }
             }
 
             themeToggleBtn.addEventListener('click', () => {
-                applyTheme(state.theme === 'dark' ? 'light' : 'dark');
+                const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+                setTheme(cur === 'dark' ? 'light' : 'dark');
             });
 
-            // Settings popover handlers (⌘K or trigger)
-            function openSettings() {
-                popoverBackdrop.classList.add('active');
-            }
-
-            function closeSettings() {
-                popoverBackdrop.classList.remove('active');
-            }
-
-            openSettingsBtn.addEventListener('click', openSettings);
-            closeSettingsBtn.addEventListener('click', closeSettings);
-
-            popoverBackdrop.addEventListener('click', (e) => {
-                if (e.target === popoverBackdrop) {
-                    closeSettings();
-                }
-            });
-
-            window.addEventListener('keydown', (e) => {
-                if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-                    e.preventDefault();
-                    if (popoverBackdrop.classList.contains('active')) {
-                        closeSettings();
-                    } else {
-                        openSettings();
-                    }
-                } else if (e.key === 'Escape' && popoverBackdrop.classList.contains('active')) {
-                    closeSettings();
-                } else if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-                    if (state.items.length > 0 && !state.isCompiling) {
-                        e.preventDefault();
-                        compilePdf();
-                    }
-                }
-            });
-
-            // Author input handler - "Ghost" fallback, dynamic state update
-            pdfAuthorInput.addEventListener('input', (e) => {
-                const val = e.target.value.trim();
-                state.author = val || 'Ghost';
-                metricAuthor.textContent = state.author;
-            });
-
-            pdfTitleInput.addEventListener('input', (e) => {
-                let val = e.target.value.trim();
-                if (val && !val.toLowerCase().endsWith('.pdf')) {
-                    val += '.pdf';
-                }
-                state.title = val || 'ghost-document.pdf';
-            });
-
-            // Segmented controls handler
-            function wireSegmentGroup(containerId, stateKey, onChange) {
-                const group = document.getElementById(containerId);
-                const buttons = group.querySelectorAll('.segmented-btn');
-                buttons.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        buttons.forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        state[stateKey] = btn.dataset.val;
-                        if (onChange) onChange(btn.dataset.val);
-                        updateTelemetry();
-                    });
+            if (mobileThemeBtn) {
+                mobileThemeBtn.addEventListener('click', () => {
+                    const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+                    setTheme(cur === 'dark' ? 'light' : 'dark');
                 });
             }
 
-            wireSegmentGroup('pageSizeSegments', 'pageSize');
-            wireSegmentGroup('orientationSegments', 'orientation');
-            wireSegmentGroup('marginSegments', 'margin', val => {
-                state.margin = Number(val);
-            });
-            wireSegmentGroup('fitSegments', 'layoutMode');
+            initTheme();
 
-            // Quality slider handler
-            qualitySlider.addEventListener('input', (e) => {
-                const val = Number(e.target.value);
-                state.quality = val;
-                const percent = Math.round(val * 100);
-                let tag = 'Balanced';
-                if (percent >= 90) tag = 'Ultra';
-                else if (percent >= 75) tag = 'High';
-                else if (percent >= 50) tag = 'Medium';
-                else tag = 'Compact';
-                qualityLabel.textContent = `${percent}% (${tag})`;
-                metricCompression.textContent = `${percent}%`;
-            });
+            // Default output filename
+            const dateStamp = new Date().toISOString().slice(0, 10);
+            pdfFileNameInput.value = `document-${dateStamp}.pdf`;
 
-            addPageNumbersCheckbox.addEventListener('change', (e) => {
-                state.addPageNumbers = e.target.checked;
-            });
+            // Live updates for author & metrics
+            function updateLiveMetrics() {
+                const totalCount = imageList.length;
+                const totalBytes = imageList.reduce((acc, curr) => acc + curr.size, 0);
 
-            resetPreferencesLink.addEventListener('click', () => {
-                state.pageSize = 'a4';
-                state.orientation = 'portrait';
-                state.margin = 12;
-                state.layoutMode = 'contain';
-                state.quality = 0.85;
-                state.addPageNumbers = false;
-                state.author = 'Ghost';
-                state.title = 'ghost-document.pdf';
+                metricPages.textContent = totalCount;
+                metricPayload.textContent = formatBytes(totalBytes);
 
-                pdfAuthorInput.value = 'Ghost';
-                pdfTitleInput.value = 'ghost-document.pdf';
-                qualitySlider.value = '0.85';
-                qualityLabel.textContent = '85% (Balanced High)';
-                addPageNumbersCheckbox.checked = false;
+                const sizeVal = pageSizeSelect.value.toUpperCase();
+                const orientVal = orientationSelect.value;
+                metricProfile.textContent = `${sizeVal} · ${orientVal}`;
 
-                syncSegmentActive('pageSizeSegments', 'a4');
-                syncSegmentActive('orientationSegments', 'portrait');
-                syncSegmentActive('marginSegments', '12');
-                syncSegmentActive('fitSegments', 'contain');
+                let rawName = pdfFileNameInput.value.trim() || 'document.pdf';
+                if (!rawName.toLowerCase().endsWith('.pdf')) rawName += '.pdf';
+                metricFile.textContent = rawName;
 
-                updateTelemetry();
-            });
+                const authorVal = authorNameInput.value.trim();
+                liveAuthorStamp.textContent = authorVal ? authorVal : 'Your name';
 
-            function syncSegmentActive(containerId, val) {
-                const group = document.getElementById(containerId);
-                group.querySelectorAll('.segmented-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.val === String(val));
-                });
+                const hasImages = totalCount > 0;
+                generatePdfBtn.disabled = !hasImages;
+                if (mobileCompileBtn) mobileCompileBtn.disabled = !hasImages;
+                clearAllBtn.disabled = !hasImages;
+                sortNameBtn.disabled = !hasImages;
+                reverseBtn.disabled = !hasImages;
+                rotateAllBtn.disabled = !hasImages;
+
+                compilerStateLabel.textContent = hasImages ? `${totalCount} page${totalCount > 1 ? 's' : ''} queued` : 'compiler ready';
             }
 
-            // Dropzone & File selection
-            dropzoneCard.addEventListener('click', () => filePickerInput.click());
-            dropzoneCard.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    filePickerInput.click();
-                }
-            });
+            authorNameInput.addEventListener('input', updateLiveMetrics);
+            pdfFileNameInput.addEventListener('input', updateLiveMetrics);
+            pageSizeSelect.addEventListener('change', updateLiveMetrics);
+            orientationSelect.addEventListener('change', updateLiveMetrics);
 
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropzoneCard.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    dropzoneCard.classList.add('dragover');
-                });
-            });
+            // Ingest file helper
+            function handleFiles(files) {
+                const validFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+                if (!validFiles.length) return;
 
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropzoneCard.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    dropzoneCard.classList.remove('dragover');
-                });
-            });
-
-            dropzoneCard.addEventListener('drop', (e) => {
-                const files = e.dataTransfer.files;
-                if (files && files.length > 0) {
-                    processFiles(files);
-                }
-            });
-
-            filePickerInput.addEventListener('change', (e) => {
-                if (e.target.files && e.target.files.length > 0) {
-                    processFiles(e.target.files);
-                    filePickerInput.value = '';
-                }
-            });
-
-            // Process uploaded files
-            async function processFiles(fileList) {
-                const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml', 'image/bmp'];
-                const additions = [];
-
-                for (let i = 0; i < fileList.length; i++) {
-                    const file = fileList[i];
-                    if (!validTypes.includes(file.type) && !file.name.match(/\.(jpe?g|png|webp|gif|svg|bmp)$/i)) {
-                        continue;
-                    }
-
+                validFiles.forEach(file => {
                     const previewUrl = URL.createObjectURL(file);
-                    const dims = await getImageDimensions(previewUrl);
-
-                    additions.push({
-                        id: 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                    imageList.push({
+                        id: 'page_' + Math.random().toString(36).substr(2, 9) + Date.now(),
+                        file: file,
+                        previewUrl: previewUrl,
                         name: file.name,
                         size: file.size,
-                        type: file.type || 'image/jpeg',
-                        width: dims.width,
-                        height: dims.height,
                         rotation: 0,
-                        previewUrl: previewUrl
-                    });
-                }
-
-                if (additions.length > 0) {
-                    state.items.push(...additions);
-                    renderQueue();
-                    updateTelemetry();
-                }
-            }
-
-            function getImageDimensions(url) {
-                return new Promise((resolve) => {
-                    const img = new Image();
-                    img.onload = () => resolve({ width: img.naturalWidth || 1200, height: img.naturalHeight || 800 });
-                    img.onerror = () => resolve({ width: 1200, height: 800 });
-                    img.src = url;
-                });
-            }
-
-            // Sample images generator (tactile architectural blueprints / diagrams)
-            addSampleBtn.addEventListener('click', () => {
-                const samples = [
-                    { name: 'schematic-grid-01.png', w: 1920, h: 1080, hue: 210, label: 'ELEVATION SURVEY' },
-                    { name: 'topological-contour-02.png', w: 1600, h: 1200, hue: 160, label: 'CONTOUR TOPOGRAPHY' },
-                    { name: 'isometric-assembly-03.png', w: 1400, h: 1400, hue: 35, label: 'VECTOR ISOMETRIC' }
-                ];
-
-                samples.forEach((sample, idx) => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = sample.w;
-                    canvas.height = sample.h;
-                    const ctx = canvas.getContext('2d');
-
-                    // Dark technical blueprint background
-                    ctx.fillStyle = '#0d1117';
-                    ctx.fillRect(0, 0, sample.w, sample.h);
-
-                    // Grid
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-                    ctx.lineWidth = 1;
-                    const step = 40;
-                    for (let x = 0; x < sample.w; x += step) {
-                        ctx.beginPath();
-                        ctx.moveTo(x, 0);
-                        ctx.lineTo(sample.h);
-                        ctx.stroke();
-                    }
-                    for (let y = 0; y < sample.h; y += step) {
-                        ctx.beginPath();
-                        ctx.moveTo(0, y);
-                        ctx.lineTo(sample.w, y);
-                        ctx.stroke();
-                    }
-
-                    // Geometric accent
-                    ctx.strokeStyle = `hsl(${sample.hue}, 80%, 65%)`;
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.arc(sample.w / 2, sample.h / 2, Math.min(sample.w, sample.h) * 0.28, 0, Math.PI * 2);
-                    ctx.stroke();
-
-                    // Diagonal telemetry cross
-                    ctx.beginPath();
-                    ctx.moveTo(sample.w * 0.2, sample.h * 0.2);
-                    ctx.lineTo(sample.w * 0.8, sample.h * 0.8);
-                    ctx.moveTo(sample.w * 0.8, sample.h * 0.2);
-                    ctx.lineTo(sample.w * 0.2, sample.h * 0.8);
-                    ctx.stroke();
-
-                    // Text
-                    ctx.fillStyle = '#F4F4F6';
-                    ctx.font = 'bold 36px monospace';
-                    ctx.fillText(`~/ghost/${sample.name}`, 60, 80);
-                    ctx.font = '24px monospace';
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                    ctx.fillText(`${sample.label} · ${sample.w}×${sample.h}`, 60, 120);
-
-                    const dataUrl = canvas.toDataURL('image/png');
-                    const approxBytes = Math.round(dataUrl.length * 0.75);
-
-                    state.items.push({
-                        id: 'sample_' + Date.now() + '_' + idx,
-                        name: sample.name,
-                        size: approxBytes,
-                        type: 'image/png',
-                        width: sample.w,
-                        height: sample.h,
-                        rotation: 0,
-                        previewUrl: dataUrl
+                        dims: null
                     });
                 });
 
+                downloadReadyBox.classList.remove('active');
                 renderQueue();
-                updateTelemetry();
+            }
+
+            // Dropzone & File Input events
+            dropzone.addEventListener('click', () => imageInput.click());
+            dropzone.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    imageInput.click();
+                }
             });
 
-            clearQueueBtn.addEventListener('click', () => {
-                state.items = [];
-                renderQueue();
-                updateTelemetry();
-                exportSuccessWell.classList.remove('active');
+            if (mobileUploadBtn) {
+                mobileUploadBtn.addEventListener('click', () => imageInput.click());
+            }
+
+            imageInput.addEventListener('change', function () {
+                handleFiles(this.files);
+                this.value = '';
             });
 
-            // Render Queue
+            ['dragenter', 'dragover'].forEach(name => {
+                dropzone.addEventListener(name, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.add('drag-active');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(name => {
+                dropzone.addEventListener(name, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.remove('drag-active');
+                });
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                if (e.dataTransfer && e.dataTransfer.files) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            });
+
+            // Global paste
+            window.addEventListener('paste', (e) => {
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                const pasted = [];
+                for (let k in items) {
+                    const item = items[k];
+                    if (item.kind === 'file' && item.type.startsWith('image/')) {
+                        pasted.push(item.getAsFile());
+                    }
+                }
+                if (pasted.length > 0) handleFiles(pasted);
+            });
+
+            // Render Queue List (01, 02 indexed rows)
             function renderQueue() {
-                queueList.innerHTML = '';
+                updateLiveMetrics();
 
-                if (state.items.length === 0) {
-                    queueList.appendChild(queueEmptyWell);
-                    clearQueueBtn.style.display = 'none';
-                    compilePdfBtn.classList.add('disabled');
-                    compileSubtext.textContent = 'queue empty · add images first';
+                if (!imageList.length) {
+                    queueList.innerHTML = `
+                        <div class="empty-craft-state">
+                            <div class="glyph-container" style="width:44px;height:44px;border-radius:12px;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
+                            </div>
+                            <div class="empty-craft-title">no images queued yet</div>
+                            <p class="empty-craft-sub">drop files onto the import card above or paste from clipboard to arrange your document.</p>
+                        </div>
+                    `;
                     return;
                 }
 
-                clearQueueBtn.style.display = 'inline-flex';
-                compilePdfBtn.classList.remove('disabled');
-                compileSubtext.textContent = `ready · ${state.items.length} page${state.items.length > 1 ? 's' : ''} in buffer`;
+                queueList.innerHTML = '';
 
-                state.items.forEach((item, index) => {
-                    const row = document.createElement('div');
+                imageList.forEach((item, index) => {
+                    const row = document.createElement('article');
                     row.className = 'queue-row';
                     row.draggable = true;
                     row.dataset.index = index;
 
-                    // Formatted index: 01., 02.
-                    const indexStr = String(index + 1).padStart(2, '0') + '.';
-                    const sizeStr = formatBytes(item.size);
-                    const rotStr = `${item.rotation}°`;
+                    const indexStr = String(index + 1).padStart(2, '0');
 
                     row.innerHTML = `
-                        <div class="row-drag-handle" title="drag to reorder">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="9" cy="5" r="1"></circle>
-                                <circle cx="9" cy="12" r="1"></circle>
-                                <circle cx="9" cy="19" r="1"></circle>
-                                <circle cx="15" cy="5" r="1"></circle>
-                                <circle cx="15" cy="12" r="1"></circle>
-                                <circle cx="15" cy="19" r="1"></circle>
-                            </svg>
+                        <div class="row-left">
+                            <span class="row-index">${indexStr}.</span>
+                            <div class="row-thumb-wrap" title="Inspect full image">
+                                <img 
+                                    class="row-thumb" 
+                                    src="${item.previewUrl}" 
+                                    alt="${escapeHtml(item.name)}" 
+                                    style="transform: rotate(${item.rotation}deg);"
+                                    loading="lazy"
+                                >
+                            </div>
+                            <div class="row-details">
+                                <div class="row-filename" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
+                                <div class="row-subbranch">
+                                    <span class="branch-arrow">↳</span>
+                                    <span class="dim-label">${item.dims ? `${item.dims.w}×${item.dims.h} px · ` : ''}${formatBytes(item.size)} · ${item.rotation}° rotation</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="row-index">${indexStr}</div>
-                        <div class="row-thumb-container">
-                            <img class="row-thumb" src="${item.previewUrl}" alt="thumb" style="transform: rotate(${item.rotation}deg);">
-                        </div>
-                        <div class="row-meta">
-                            <div class="row-name" title="${item.name}">${item.name}</div>
-                            <div class="sub-branch">↳ ${item.width}×${item.height} · ${sizeStr} · ${rotStr}</div>
-                        </div>
+
                         <div class="row-actions">
-                            <button type="button" class="icon-btn btn-rotate" title="rotate 90°">
-                                <svg viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+                            <button class="btn-row-action btn-move-up" title="Move page up" ${index === 0 ? 'disabled' : ''} aria-label="Move page up">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="18 15 12 9 6 15"></polyline>
+                                </svg>
                             </button>
-                            <button type="button" class="icon-btn btn-up" title="move up" ${index === 0 ? 'disabled style="opacity:0.3;"' : ''}>
-                                <svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                            <button class="btn-row-action btn-move-down" title="Move page down" ${index === imageList.length - 1 ? 'disabled' : ''} aria-label="Move page down">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
                             </button>
-                            <button type="button" class="icon-btn btn-down" title="move down" ${index === state.items.length - 1 ? 'disabled style="opacity:0.3;"' : ''}>
-                                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+                            <button class="btn-row-action btn-rotate-single" title="Rotate 90° clockwise" aria-label="Rotate 90 degrees">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                </svg>
                             </button>
-                            <button type="button" class="icon-btn danger btn-remove" title="remove">
-                                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            <button class="btn-row-action btn-row-delete" title="Remove page" aria-label="Remove page">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
                             </button>
                         </div>
                     `;
 
-                    // Wire row action buttons
-                    row.querySelector('.btn-rotate').addEventListener('click', (e) => {
+                    // Async load dimensions if not cached
+                    if (!item.dims) {
+                        const imgTemp = new Image();
+                        imgTemp.onload = () => {
+                            item.dims = { w: imgTemp.naturalWidth, h: imgTemp.naturalHeight };
+                            const subbranch = row.querySelector('.row-subbranch');
+                            if (subbranch) {
+                                subbranch.innerHTML = `
+                                    <span class="branch-arrow">↳</span>
+                                    <span>${item.dims.w}×${item.dims.h} px · ${formatBytes(item.size)} · ${item.rotation}° rotation</span>
+                                `;
+                            }
+                        };
+                        imgTemp.src = item.previewUrl;
+                    }
+
+                    // Lightbox inspect
+                    row.querySelector('.row-thumb-wrap').addEventListener('click', () => {
+                        openLightbox(item.previewUrl, item.rotation);
+                    });
+
+                    // Move up
+                    row.querySelector('.btn-move-up').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (index > 0) {
+                            const tmp = imageList[index];
+                            imageList[index] = imageList[index - 1];
+                            imageList[index - 1] = tmp;
+                            renderQueue();
+                        }
+                    });
+
+                    // Move down
+                    row.querySelector('.btn-move-down').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (index < imageList.length - 1) {
+                            const tmp = imageList[index];
+                            imageList[index] = imageList[index + 1];
+                            imageList[index + 1] = tmp;
+                            renderQueue();
+                        }
+                    });
+
+                    // Rotate 90
+                    row.querySelector('.btn-rotate-single').addEventListener('click', (e) => {
                         e.stopPropagation();
                         item.rotation = (item.rotation + 90) % 360;
-                        renderQueue();
+                        const thumb = row.querySelector('.row-thumb');
+                        thumb.style.transform = `rotate(${item.rotation}deg)`;
+                        const subbranch = row.querySelector('.row-subbranch');
+                        if (subbranch && item.dims) {
+                            subbranch.innerHTML = `
+                                <span class="branch-arrow">↳</span>
+                                <span>${item.dims.w}×${item.dims.h} px · ${formatBytes(item.size)} · ${item.rotation}° rotation</span>
+                            `;
+                        }
                     });
 
-                    const btnUp = row.querySelector('.btn-up');
-                    if (index > 0) {
-                        btnUp.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            swapItems(index, index - 1);
-                        });
-                    }
-
-                    const btnDown = row.querySelector('.btn-down');
-                    if (index < state.items.length - 1) {
-                        btnDown.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            swapItems(index, index + 1);
-                        });
-                    }
-
-                    row.querySelector('.btn-remove').addEventListener('click', (e) => {
+                    // Delete single
+                    row.querySelector('.btn-row-delete').addEventListener('click', (e) => {
                         e.stopPropagation();
-                        state.items.splice(index, 1);
+                        URL.revokeObjectURL(item.previewUrl);
+                        imageList.splice(index, 1);
                         renderQueue();
-                        updateTelemetry();
                     });
 
-                    // Drag and drop reordering
+                    // HTML5 Drag and drop reordering
                     row.addEventListener('dragstart', (e) => {
-                        state.draggedIndex = index;
+                        draggedIndex = index;
                         row.classList.add('dragging');
                         e.dataTransfer.effectAllowed = 'move';
+                        e.dataTransfer.setData('text/plain', index);
                     });
 
                     row.addEventListener('dragend', () => {
                         row.classList.remove('dragging');
-                        state.draggedIndex = null;
+                        draggedIndex = null;
+                        document.querySelectorAll('.queue-row').forEach(r => r.classList.remove('drag-over-row'));
                     });
 
                     row.addEventListener('dragover', (e) => {
                         e.preventDefault();
                         e.dataTransfer.dropEffect = 'move';
+                        row.classList.add('drag-over-row');
+                    });
+
+                    row.addEventListener('dragleave', () => {
+                        row.classList.remove('drag-over-row');
                     });
 
                     row.addEventListener('drop', (e) => {
                         e.preventDefault();
-                        e.stopPropagation();
-                        const targetIndex = Number(row.dataset.index);
-                        if (state.draggedIndex !== null && state.draggedIndex !== targetIndex) {
-                            const moved = state.items.splice(state.draggedIndex, 1)[0];
-                            state.items.splice(targetIndex, 0, moved);
+                        row.classList.remove('drag-over-row');
+                        const targetIndex = index;
+                        if (draggedIndex !== null && draggedIndex !== targetIndex) {
+                            const moved = imageList.splice(draggedIndex, 1)[0];
+                            imageList.splice(targetIndex, 0, moved);
                             renderQueue();
                         }
                     });
@@ -1684,98 +1916,127 @@
                 });
             }
 
-            function swapItems(i, j) {
-                const temp = state.items[i];
-                state.items[i] = state.items[j];
-                state.items[j] = temp;
+            function escapeHtml(str) {
+                return String(str).replace(/[&<>"']/g, match => ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+                }[match]));
+            }
+
+            // Batch actions
+            clearAllBtn.addEventListener('click', () => {
+                if (!imageList.length) return;
+                imageList.forEach(i => URL.revokeObjectURL(i.previewUrl));
+                imageList = [];
+                downloadReadyBox.classList.remove('active');
                 renderQueue();
-            }
-
-            // Telemetry updates
-            function updateTelemetry() {
-                const count = state.items.length;
-                metricPages.textContent = count;
-
-                let totalBytes = 0;
-                state.items.forEach(it => totalBytes += it.size);
-                // Estimate PDF payload after jpeg compression
-                const estBytes = Math.round(totalBytes * state.quality);
-                metricPayload.textContent = count === 0 ? '0 kb' : formatBytes(estBytes);
-
-                metricCompression.textContent = `${Math.round(state.quality * 100)}%`;
-                metricAuthor.textContent = state.author || 'Ghost';
-
-                const orientationText = state.orientation;
-                activeProfileLabel.textContent = `${state.pageSize.toUpperCase()} · ${orientationText}`;
-
-                if (count === 0) {
-                    badgeQueueText.textContent = 'idle queue';
-                } else {
-                    badgeQueueText.textContent = `${count} page${count > 1 ? 's' : ''} queued`;
-                }
-            }
-
-            function formatBytes(bytes) {
-                if (!bytes || bytes === 0) return '0 kb';
-                if (bytes < 1024) return bytes + ' b';
-                const kb = bytes / 1024;
-                if (kb < 1024) return Math.round(kb) + ' kb';
-                return (kb / 1024).toFixed(1) + ' mb';
-            }
-
-            // PDF Compilation Engine
-            compilePdfBtn.addEventListener('click', () => {
-                if (state.items.length > 0 && !state.isCompiling) {
-                    compilePdf();
-                }
             });
 
-            async function compilePdf() {
-                if (!window.jspdf || !window.jspdf.jsPDF) {
-                    alert('PDF compilation engine is not loaded.');
-                    return;
-                }
+            sortNameBtn.addEventListener('click', () => {
+                imageList.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+                renderQueue();
+            });
 
-                state.isCompiling = true;
-                compilePdfBtn.classList.add('disabled');
-                compileProgressWell.classList.add('active');
-                exportSuccessWell.classList.remove('active');
+            reverseBtn.addEventListener('click', () => {
+                imageList.reverse();
+                renderQueue();
+            });
 
-                const PAGE_SIZES = {
-                    a4: [210, 297],
-                    letter: [215.9, 279.4],
-                    legal: [215.9, 355.6],
-                    a3: [297, 420]
-                };
+            rotateAllBtn.addEventListener('click', () => {
+                imageList.forEach(item => {
+                    item.rotation = (item.rotation + 90) % 360;
+                });
+                renderQueue();
+            });
 
-                const totalPages = state.items.length;
-                let pdf = null;
-                const startTime = performance.now();
+            // Lightbox
+            function openLightbox(url, rotation) {
+                lightboxImg.src = url;
+                lightboxImg.style.transform = `rotate(${rotation}deg)`;
+                lightboxBackdrop.classList.add('active');
+            }
+
+            function closeLightbox() {
+                lightboxBackdrop.classList.remove('active');
+                lightboxImg.src = '';
+            }
+
+            lightboxCloseBtn.addEventListener('click', closeLightbox);
+            lightboxBackdrop.addEventListener('click', (e) => {
+                if (e.target === lightboxBackdrop) closeLightbox();
+            });
+
+            // Image Loader Promise
+            function loadImageElement(src) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = () => reject(new Error('Failed to load image: ' + src));
+                    img.src = src;
+                });
+            }
+
+            // PDF Compiler Engine (using jsPDF)
+            async function compilePdfDocument() {
+                if (imageList.length === 0 || isProcessing) return;
+
+                isProcessing = true;
+                generatePdfBtn.disabled = true;
+                if (mobileCompileBtn) mobileCompileBtn.disabled = true;
+                downloadReadyBox.classList.remove('active');
+
+                progressBackdrop.classList.add('active');
+                progressBarFill.style.width = '0%';
+                progressStatusText.textContent = 'initializing document engine...';
 
                 try {
-                    for (let i = 0; i < totalPages; i++) {
-                        const item = state.items[i];
-                        const pct = Math.round(((i) / totalPages) * 100);
-                        compileProgressBarFill.style.width = `${pct}%`;
-                        compileProgressText.textContent = `↳ compiling page ${i + 1} of ${totalPages} · ${item.name}`;
+                    const { jsPDF } = window.jspdf;
+                    if (!jsPDF) throw new Error('jsPDF library could not be loaded.');
 
+                    const pageSize = pageSizeSelect.value;
+                    const orientationMode = orientationSelect.value;
+                    const margin = Number(marginSelect.value);
+                    const layoutMode = layoutModeSelect.value;
+                    const quality = Number(qualitySelect.value);
+                    const addPageNumbers = addPageNumbersCheckbox.checked;
+                    const authorName = authorNameInput.value.trim() || 'Anonymous';
+
+                    let customName = pdfFileNameInput.value.trim();
+                    if (!customName.toLowerCase().endsWith('.pdf')) customName += '.pdf';
+
+                    const PAGE_SIZES = {
+                        a4: [210, 297],
+                        letter: [215.9, 279.4],
+                        legal: [215.9, 355.6],
+                        a3: [297, 420],
+                        a5: [148, 210]
+                    };
+
+                    let pdf = null;
+                    const totalPages = imageList.length;
+
+                    for (let i = 0; i < totalPages; i++) {
+                        const item = imageList[i];
+                        const percent = Math.round((i / totalPages) * 100);
+                        progressBarFill.style.width = `${percent}%`;
+                        progressStatusText.textContent = `rendering page ${i + 1} of ${totalPages}...`;
+                        progressSubtext.textContent = item.name;
+
+                        // Give breath to browser frame
                         await new Promise(r => setTimeout(r, 16));
 
-                        // Load image
-                        const img = await loadImage(item.previewUrl);
+                        const rawImg = await loadImageElement(item.previewUrl);
 
-                        // Rotation & Scaling canvas
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
 
-                        const isTurned = item.rotation === 90 || item.rotation === 270;
-                        const naturalW = isTurned ? img.naturalHeight : img.naturalWidth;
-                        const naturalH = isTurned ? img.naturalWidth : img.naturalHeight;
+                        const is90or270 = item.rotation === 90 || item.rotation === 270;
+                        const natW = is90or270 ? rawImg.naturalHeight : rawImg.naturalWidth;
+                        const natH = is90or270 ? rawImg.naturalWidth : rawImg.naturalHeight;
 
-                        // Mobile memory safety cap
+                        // High resolution bounds cap
                         const maxDim = 3840;
-                        let targetW = naturalW;
-                        let targetH = naturalH;
+                        let targetW = natW;
+                        let targetH = natH;
                         if (targetW > maxDim || targetH > maxDim) {
                             if (targetW > targetH) {
                                 targetH = Math.round((targetH * maxDim) / targetW);
@@ -1792,32 +2053,33 @@
                         ctx.save();
                         ctx.translate(canvas.width / 2, canvas.height / 2);
                         ctx.rotate((item.rotation * Math.PI) / 180);
-                        const drawW = isTurned ? targetH : targetW;
-                        const drawH = isTurned ? targetW : targetH;
-                        ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
+
+                        const drawW = is90or270 ? targetH : targetW;
+                        const drawH = is90or270 ? targetW : targetH;
+                        ctx.drawImage(rawImg, -drawW / 2, -drawH / 2, drawW, drawH);
                         ctx.restore();
 
-                        const jpegData = canvas.toDataURL('image/jpeg', state.quality);
+                        const processedDataUrl = canvas.toDataURL('image/jpeg', quality);
+
                         canvas.width = 0;
                         canvas.height = 0;
 
-                        // Determine Page Geometry
                         let pageW, pageH;
                         let pageOrientation = 'portrait';
 
-                        if (state.pageSize === 'fit') {
+                        if (pageSize === 'fit') {
                             const pxToMm = 0.264583;
                             pageW = targetW * pxToMm;
                             pageH = targetH * pxToMm;
                             pageOrientation = pageW > pageH ? 'landscape' : 'portrait';
                         } else {
-                            const standardDim = PAGE_SIZES[state.pageSize] || PAGE_SIZES.a4;
-                            const isLandscape = targetW > targetH;
+                            const standardDim = PAGE_SIZES[pageSize] || PAGE_SIZES.a4;
+                            const isImageLandscape = targetW > targetH;
 
-                            if (state.orientation === 'auto') {
-                                pageOrientation = isLandscape ? 'landscape' : 'portrait';
+                            if (orientationMode === 'auto') {
+                                pageOrientation = isImageLandscape ? 'landscape' : 'portrait';
                             } else {
-                                pageOrientation = state.orientation;
+                                pageOrientation = orientationMode;
                             }
 
                             if (pageOrientation === 'landscape') {
@@ -1829,35 +2091,33 @@
                             }
                         }
 
-                        // Initialize jsPDF instance on page 0
                         if (i === 0) {
-                            pdf = new window.jspdf.jsPDF({
+                            pdf = new jsPDF({
                                 orientation: pageOrientation,
                                 unit: 'mm',
-                                format: state.pageSize === 'fit' ? [pageW, pageH] : state.pageSize,
+                                format: pageSize === 'fit' ? [pageW, pageH] : pageSize,
                                 compress: true
                             });
 
-                            // Set Document Properties with author rule
+                            // Inject document properties
                             pdf.setProperties({
-                                title: state.title,
-                                author: state.author || 'Ghost',
-                                creator: 'Ghost (~/ghost/image-to-pdf)'
+                                title: customName.replace(/\.pdf$/i, ''),
+                                subject: 'Image to PDF Compilation',
+                                author: authorName,
+                                creator: 'Quiet Craft Studio (ShapedINTO)'
                             });
                         } else {
-                            pdf.addPage(state.pageSize === 'fit' ? [pageW, pageH] : state.pageSize, pageOrientation);
+                            pdf.addPage(pageSize === 'fit' ? [pageW, pageH] : pageSize, pageOrientation);
                         }
 
-                        // Margins and Scaling
-                        const margin = state.pageSize === 'fit' ? 0 : state.margin;
                         const availW = Math.max(10, pageW - (margin * 2));
                         const availH = Math.max(10, pageH - (margin * 2));
 
                         const imgRatio = targetW / targetH;
                         const availRatio = availW / availH;
-                        let finalW, finalH;
 
-                        if (state.layoutMode === 'cover') {
+                        let finalW, finalH;
+                        if (layoutMode === 'cover') {
                             if (imgRatio > availRatio) {
                                 finalH = availH;
                                 finalW = finalH * imgRatio;
@@ -1878,53 +2138,128 @@
                         const posX = (pageW - finalW) / 2;
                         const posY = (pageH - finalH) / 2;
 
-                        pdf.addImage(jpegData, 'JPEG', posX, posY, finalW, finalH, undefined, 'FAST');
+                        pdf.addImage(processedDataUrl, 'JPEG', posX, posY, finalW, finalH, undefined, 'FAST');
 
-                        // Page numbering footer
-                        if (state.addPageNumbers && state.pageSize !== 'fit') {
+                        if (addPageNumbers && pageSize !== 'fit') {
                             pdf.setFontSize(8);
-                            pdf.setTextColor(113, 113, 122);
-                            const footerText = `p. ${i + 1} / ${totalPages}`;
+                            pdf.setTextColor(130, 130, 130);
+                            const footerText = `${i + 1} / ${totalPages}`;
                             pdf.text(footerText, pageW / 2, pageH - Math.max(3, margin / 2), { align: 'center' });
                         }
                     }
 
-                    compileProgressBarFill.style.width = '100%';
-                    compileProgressText.textContent = `↳ packing output document...`;
-                    await new Promise(r => setTimeout(r, 60));
+                    progressBarFill.style.width = '100%';
+                    progressStatusText.textContent = 'finalizing bytes...';
+                    await new Promise(r => setTimeout(r, 80));
 
                     const pdfBlob = pdf.output('blob');
-                    const fileName = state.title || 'ghost-document.pdf';
-                    const elapsed = Math.round(performance.now() - startTime);
+                    pdf.save(customName);
 
-                    pdf.save(fileName);
-
-                    const blobUrl = URL.createObjectURL(pdfBlob);
-                    downloadAgainLink.href = blobUrl;
-                    downloadAgainLink.download = fileName;
-
-                    exportDetailsText.textContent = `↳ compiled in ${elapsed}ms · ${totalPages} page${totalPages > 1 ? 's' : ''} · ${formatBytes(pdfBlob.size)}`;
-                    exportSuccessWell.classList.add('active');
+                    const pdfUrl = URL.createObjectURL(pdfBlob);
+                    downloadDirectLink.href = pdfUrl;
+                    downloadDirectLink.download = customName;
+                    downloadMetaText.textContent = `compiled ${totalPages} page${totalPages > 1 ? 's' : ''} · ${formatBytes(pdfBlob.size)} · ready`;
+                    downloadReadyBox.classList.add('active');
 
                 } catch (err) {
                     console.error('Compilation failed:', err);
-                    alert('PDF compilation error: ' + (err.message || 'unknown error'));
+                    alert('PDF compilation error: ' + (err.message || 'Unknown error'));
                 } finally {
-                    state.isCompiling = false;
-                    compileProgressWell.classList.remove('active');
-                    compilePdfBtn.classList.remove('disabled');
+                    progressBackdrop.classList.remove('active');
+                    isProcessing = false;
+                    generatePdfBtn.disabled = imageList.length === 0;
+                    if (mobileCompileBtn) mobileCompileBtn.disabled = imageList.length === 0;
                 }
             }
 
-            function loadImage(src) {
-                return new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.onload = () => resolve(img);
-                    img.onerror = () => reject(new Error('image load failed'));
-                    img.src = src;
+            generatePdfBtn.addEventListener('click', compilePdfDocument);
+            if (mobileCompileBtn) mobileCompileBtn.addEventListener('click', compilePdfDocument);
+
+            // Command Palette (Cmd/Ctrl + K)
+            function openCommandPalette() {
+                paletteBackdrop.classList.add('active');
+                paletteInput.value = '';
+                paletteInput.focus();
+                filterPalette('');
+            }
+
+            function closeCommandPalette() {
+                paletteBackdrop.classList.remove('active');
+            }
+
+            cmdPaletteBtn.addEventListener('click', openCommandPalette);
+
+            paletteBackdrop.addEventListener('click', (e) => {
+                if (e.target === paletteBackdrop) closeCommandPalette();
+            });
+
+            paletteInput.addEventListener('input', (e) => {
+                filterPalette(e.target.value.toLowerCase().trim());
+            });
+
+            function filterPalette(query) {
+                const items = paletteList.querySelectorAll('.palette-item');
+                items.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    item.style.display = text.includes(query) ? 'flex' : 'none';
                 });
             }
 
+            paletteList.addEventListener('click', (e) => {
+                const item = e.target.closest('.palette-item');
+                if (!item) return;
+                const act = item.dataset.action;
+                executeAction(act);
+                closeCommandPalette();
+            });
+
+            function executeAction(act) {
+                switch (act) {
+                    case 'upload':
+                        imageInput.click();
+                        break;
+                    case 'compile':
+                        compilePdfDocument();
+                        break;
+                    case 'theme':
+                        const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+                        setTheme(cur === 'dark' ? 'light' : 'dark');
+                        break;
+                    case 'sort':
+                        sortNameBtn.click();
+                        break;
+                    case 'reverse':
+                        reverseBtn.click();
+                        break;
+                    case 'rotate-all':
+                        rotateAllBtn.click();
+                        break;
+                    case 'clear':
+                        clearAllBtn.click();
+                        break;
+                }
+            }
+
+            // Keyboard Shortcuts
+            document.addEventListener('keydown', (e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+                    e.preventDefault();
+                    if (paletteBackdrop.classList.contains('active')) {
+                        closeCommandPalette();
+                    } else {
+                        openCommandPalette();
+                    }
+                    return;
+                }
+
+                if (e.key === 'Escape') {
+                    if (paletteBackdrop.classList.contains('active')) closeCommandPalette();
+                    if (lightboxBackdrop.classList.contains('active')) closeLightbox();
+                }
+            });
+
+            // Initial render
+            renderQueue();
         })();
     </script>
 </body>
