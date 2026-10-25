@@ -1050,4 +1050,680 @@
             </div>
         </section>
 
-        </main></body></html>
+        <!-- Indexed 01. + ↳ Rows: Image Queue Section -->
+        <section class="queue-container">
+            <div class="section-header">
+                <div>
+                    <span class="section-title">queue</span>
+                    <span class="script-note">*(page order)*</span>
+                </div>
+                <div class="queue-header-actions">
+                    <button type="button" class="btn-tactile" id="addSampleBtn" title="load sample image sequence">
+                        <span>+ sample sequence</span>
+                    </button>
+                    <button type="button" class="btn-tactile" id="clearQueueBtn" style="display:none;" title="clear queue">
+                        <span>clear</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="queueList">
+                <!-- Empty state -->
+                <div class="queue-empty-well" id="queueEmptyWell">
+                    <div style="font-family: var(--font-script); font-size: 24px; color: var(--text-secondary);">no images in buffer</div>
+                    <div>↳ drop files above or click to pick images</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="page-footer">
+            <div>~/ghost/image-to-pdf · client memory compilation · zero analytics</div>
+        </footer>
+
+    </main>
+
+    <!-- macOS Popover Dialog: Preferences (⌘K) -->
+    <div class="popover-backdrop" id="popoverBackdrop" role="dialog" aria-modal="true">
+        <div class="popover-card">
+            <div class="popover-header">
+                <div class="popover-title">~/ghost/image-to-pdf :: preferences</div>
+                <button type="button" class="icon-btn" id="closeSettingsBtn" title="close (esc)">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <!-- Author & Identity Rule: Ghost fallback, "John Doe" placeholder hint -->
+            <div class="settings-group">
+                <div class="settings-label-row">
+                    <label class="settings-label" for="pdfAuthorInput">document author</label>
+                    <span class="settings-hint">pdf metadata header</span>
+                </div>
+                <input type="text" id="pdfAuthorInput" class="text-input" placeholder="John Doe" value="Ghost">
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-label-row">
+                    <label class="settings-label" for="pdfTitleInput">file name</label>
+                    <span class="settings-hint">output identifier</span>
+                </div>
+                <input type="text" id="pdfTitleInput" class="text-input" value="ghost-document.pdf">
+            </div>
+
+            <hr class="dashed-divider">
+
+            <!-- Page Size -->
+            <div class="settings-group">
+                <div class="settings-label-row">
+                    <span class="settings-label">page format</span>
+                    <span class="settings-hint">physical size</span>
+                </div>
+                <div class="segmented-group" id="pageSizeSegments">
+                    <button type="button" class="segmented-btn active" data-val="a4">A4</button>
+                    <button type="button" class="segmented-btn" data-val="letter">Letter</button>
+                    <button type="button" class="segmented-btn" data-val="legal">Legal</button>
+                    <button type="button" class="segmented-btn" data-val="a3">A3</button>
+                    <button type="button" class="segmented-btn" data-val="fit">Fit</button>
+                </div>
+            </div>
+
+            <!-- Page Orientation -->
+            <div class="settings-group">
+                <div class="settings-label-row">
+                    <span class="settings-label">orientation</span>
+                    <span class="settings-hint">document aspect</span>
+                </div>
+                <div class="segmented-group" id="orientationSegments">
+                    <button type="button" class="segmented-btn active" data-val="portrait">Portrait</button>
+                    <button type="button" class="segmented-btn" data-val="landscape">Landscape</button>
+                    <button type="button" class="segmented-btn" data-val="auto">Auto</button>
+                </div>
+            </div>
+
+            <!-- Margin Presets -->
+            <div class="settings-group">
+                <div class="settings-label-row">
+                    <span class="settings-label">margin</span>
+                    <span class="settings-hint">page border inset</span>
+                </div>
+                <div class="segmented-group" id="marginSegments">
+                    <button type="button" class="segmented-btn" data-val="0">None</button>
+                    <button type="button" class="segmented-btn" data-val="6">6mm</button>
+                    <button type="button" class="segmented-btn active" data-val="12">12mm</button>
+                    <button type="button" class="segmented-btn" data-val="20">20mm</button>
+                </div>
+            </div>
+
+            <!-- Image Fit Mode -->
+            <div class="settings-group">
+                <div class="settings-label-row">
+                    <span class="settings-label">scaling mode</span>
+                    <span class="settings-hint">aspect ratio behavior</span>
+                </div>
+                <div class="segmented-group" id="fitSegments">
+                    <button type="button" class="segmented-btn active" data-val="contain">Contain (Fit)</button>
+                    <button type="button" class="segmented-btn" data-val="cover">Cover (Fill)</button>
+                </div>
+            </div>
+
+            <hr class="dashed-divider">
+
+            <!-- Compression Quality -->
+            <div class="settings-group">
+                <div class="settings-label-row">
+                    <label class="settings-label" for="qualitySlider">jpeg compression</label>
+                    <span class="settings-hint" id="qualityLabel">85% (Balanced High)</span>
+                </div>
+                <input type="range" class="slider-control" id="qualitySlider" min="0.2" max="1.0" step="0.05" value="0.85">
+            </div>
+
+            <!-- Page numbering -->
+            <div class="settings-group">
+                <div class="settings-label-row" style="cursor: pointer;" id="toggleNumberingRow">
+                    <span class="settings-label">page numbering</span>
+                    <input type="checkbox" id="addPageNumbersCheckbox" style="accent-color: var(--text-primary); cursor: pointer;">
+                </div>
+            </div>
+
+            <div class="popover-footer">
+                <span>press <kbd style="font-family: var(--font-mono); background: var(--code-bg); padding: 1px 4px; border-radius: 4px;">esc</kbd> to dismiss</span>
+                <span class="wavy-link" id="resetPreferencesLink">reset defaults</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        (function () {
+            'use strict';
+
+            // State
+            const state = {
+                items: [],
+                pageSize: 'a4',
+                orientation: 'portrait',
+                margin: 12,
+                layoutMode: 'contain',
+                quality: 0.85,
+                addPageNumbers: false,
+                author: 'Ghost',
+                title: 'ghost-document.pdf',
+                theme: localStorage.getItem('ghost-theme') || 'dark',
+                draggedIndex: null,
+                isCompiling: false
+            };
+
+            // DOM elements
+            const htmlEl = document.documentElement;
+            const dropzoneCard = document.getElementById('dropzoneCard');
+            const filePickerInput = document.getElementById('filePickerInput');
+            const compilePdfBtn = document.getElementById('compilePdfBtn');
+            const compileSubtext = document.getElementById('compileSubtext');
+            const queueList = document.getElementById('queueList');
+            const queueEmptyWell = document.getElementById('queueEmptyWell');
+            const clearQueueBtn = document.getElementById('clearQueueBtn');
+            const addSampleBtn = document.getElementById('addSampleBtn');
+            const topTelemetryBadge = document.getElementById('topTelemetryBadge');
+            const badgeQueueText = document.getElementById('badgeQueueText');
+            const activeProfileLabel = document.getElementById('activeProfileLabel');
+            const metricPages = document.getElementById('metricPages');
+            const metricPayload = document.getElementById('metricPayload');
+            const metricCompression = document.getElementById('metricCompression');
+            const metricAuthor = document.getElementById('metricAuthor');
+            const themeToggleBtn = document.getElementById('themeToggleBtn');
+            const themeIconDark = document.getElementById('themeIconDark');
+            const themeIconLight = document.getElementById('themeIconLight');
+
+            // Popover elements
+            const openSettingsBtn = document.getElementById('openSettingsBtn');
+            const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+            const popoverBackdrop = document.getElementById('popoverBackdrop');
+            const pdfAuthorInput = document.getElementById('pdfAuthorInput');
+            const pdfTitleInput = document.getElementById('pdfTitleInput');
+            const qualitySlider = document.getElementById('qualitySlider');
+            const qualityLabel = document.getElementById('qualityLabel');
+            const addPageNumbersCheckbox = document.getElementById('addPageNumbersCheckbox');
+            const resetPreferencesLink = document.getElementById('resetPreferencesLink');
+
+            // Progress & Export elements
+            const compileProgressWell = document.getElementById('compileProgressWell');
+            const compileProgressText = document.getElementById('compileProgressText');
+            const compileProgressBarFill = document.getElementById('compileProgressBarFill');
+            const exportSuccessWell = document.getElementById('exportSuccessWell');
+            const exportDetailsText = document.getElementById('exportDetailsText');
+            const downloadAgainLink = document.getElementById('downloadAgainLink');
+
+            // Set initial theme
+            applyTheme(state.theme);
+
+            function applyTheme(theme) {
+                state.theme = theme;
+                htmlEl.setAttribute('data-theme', theme);
+                localStorage.setItem('ghost-theme', theme);
+                if (theme === 'dark') {
+                    themeIconDark.style.display = 'inline-block';
+                    themeIconLight.style.display = 'none';
+                } else {
+                    themeIconDark.style.display = 'none';
+                    themeIconLight.style.display = 'inline-block';
+                }
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                applyTheme(state.theme === 'dark' ? 'light' : 'dark');
+            });
+
+            // Settings popover handlers (⌘K or trigger)
+            function openSettings() {
+                popoverBackdrop.classList.add('active');
+            }
+
+            function closeSettings() {
+                popoverBackdrop.classList.remove('active');
+            }
+
+            openSettingsBtn.addEventListener('click', openSettings);
+            closeSettingsBtn.addEventListener('click', closeSettings);
+
+            popoverBackdrop.addEventListener('click', (e) => {
+                if (e.target === popoverBackdrop) {
+                    closeSettings();
+                }
+            });
+
+            window.addEventListener('keydown', (e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+                    e.preventDefault();
+                    if (popoverBackdrop.classList.contains('active')) {
+                        closeSettings();
+                    } else {
+                        openSettings();
+                    }
+                } else if (e.key === 'Escape' && popoverBackdrop.classList.contains('active')) {
+                    closeSettings();
+                } else if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                    if (state.items.length > 0 && !state.isCompiling) {
+                        e.preventDefault();
+                        compilePdf();
+                    }
+                }
+            });
+
+            // Author input handler - "Ghost" fallback, dynamic state update
+            pdfAuthorInput.addEventListener('input', (e) => {
+                const val = e.target.value.trim();
+                state.author = val || 'Ghost';
+                metricAuthor.textContent = state.author;
+            });
+
+            pdfTitleInput.addEventListener('input', (e) => {
+                let val = e.target.value.trim();
+                if (val && !val.toLowerCase().endsWith('.pdf')) {
+                    val += '.pdf';
+                }
+                state.title = val || 'ghost-document.pdf';
+            });
+
+            // Segmented controls handler
+            function wireSegmentGroup(containerId, stateKey, onChange) {
+                const group = document.getElementById(containerId);
+                const buttons = group.querySelectorAll('.segmented-btn');
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        buttons.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        state[stateKey] = btn.dataset.val;
+                        if (onChange) onChange(btn.dataset.val);
+                        updateTelemetry();
+                    });
+                });
+            }
+
+            wireSegmentGroup('pageSizeSegments', 'pageSize');
+            wireSegmentGroup('orientationSegments', 'orientation');
+            wireSegmentGroup('marginSegments', 'margin', val => {
+                state.margin = Number(val);
+            });
+            wireSegmentGroup('fitSegments', 'layoutMode');
+
+            // Quality slider handler
+            qualitySlider.addEventListener('input', (e) => {
+                const val = Number(e.target.value);
+                state.quality = val;
+                const percent = Math.round(val * 100);
+                let tag = 'Balanced';
+                if (percent >= 90) tag = 'Ultra';
+                else if (percent >= 75) tag = 'High';
+                else if (percent >= 50) tag = 'Medium';
+                else tag = 'Compact';
+                qualityLabel.textContent = `${percent}% (${tag})`;
+                metricCompression.textContent = `${percent}%`;
+            });
+
+            addPageNumbersCheckbox.addEventListener('change', (e) => {
+                state.addPageNumbers = e.target.checked;
+            });
+
+            resetPreferencesLink.addEventListener('click', () => {
+                state.pageSize = 'a4';
+                state.orientation = 'portrait';
+                state.margin = 12;
+                state.layoutMode = 'contain';
+                state.quality = 0.85;
+                state.addPageNumbers = false;
+                state.author = 'Ghost';
+                state.title = 'ghost-document.pdf';
+
+                pdfAuthorInput.value = 'Ghost';
+                pdfTitleInput.value = 'ghost-document.pdf';
+                qualitySlider.value = '0.85';
+                qualityLabel.textContent = '85% (Balanced High)';
+                addPageNumbersCheckbox.checked = false;
+
+                syncSegmentActive('pageSizeSegments', 'a4');
+                syncSegmentActive('orientationSegments', 'portrait');
+                syncSegmentActive('marginSegments', '12');
+                syncSegmentActive('fitSegments', 'contain');
+
+                updateTelemetry();
+            });
+
+            function syncSegmentActive(containerId, val) {
+                const group = document.getElementById(containerId);
+                group.querySelectorAll('.segmented-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.val === String(val));
+                });
+            }
+
+            // Dropzone & File selection
+            dropzoneCard.addEventListener('click', () => filePickerInput.click());
+            dropzoneCard.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    filePickerInput.click();
+                }
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzoneCard.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzoneCard.classList.add('dragover');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzoneCard.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzoneCard.classList.remove('dragover');
+                });
+            });
+
+            dropzoneCard.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files && files.length > 0) {
+                    processFiles(files);
+                }
+            });
+
+            filePickerInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                    processFiles(e.target.files);
+                    filePickerInput.value = '';
+                }
+            });
+
+            // Process uploaded files
+            async function processFiles(fileList) {
+                const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml', 'image/bmp'];
+                const additions = [];
+
+                for (let i = 0; i < fileList.length; i++) {
+                    const file = fileList[i];
+                    if (!validTypes.includes(file.type) && !file.name.match(/\.(jpe?g|png|webp|gif|svg|bmp)$/i)) {
+                        continue;
+                    }
+
+                    const previewUrl = URL.createObjectURL(file);
+                    const dims = await getImageDimensions(previewUrl);
+
+                    additions.push({
+                        id: 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                        name: file.name,
+                        size: file.size,
+                        type: file.type || 'image/jpeg',
+                        width: dims.width,
+                        height: dims.height,
+                        rotation: 0,
+                        previewUrl: previewUrl
+                    });
+                }
+
+                if (additions.length > 0) {
+                    state.items.push(...additions);
+                    renderQueue();
+                    updateTelemetry();
+                }
+            }
+
+            function getImageDimensions(url) {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => resolve({ width: img.naturalWidth || 1200, height: img.naturalHeight || 800 });
+                    img.onerror = () => resolve({ width: 1200, height: 800 });
+                    img.src = url;
+                });
+            }
+
+            // Sample images generator (tactile architectural blueprints / diagrams)
+            addSampleBtn.addEventListener('click', () => {
+                const samples = [
+                    { name: 'schematic-grid-01.png', w: 1920, h: 1080, hue: 210, label: 'ELEVATION SURVEY' },
+                    { name: 'topological-contour-02.png', w: 1600, h: 1200, hue: 160, label: 'CONTOUR TOPOGRAPHY' },
+                    { name: 'isometric-assembly-03.png', w: 1400, h: 1400, hue: 35, label: 'VECTOR ISOMETRIC' }
+                ];
+
+                samples.forEach((sample, idx) => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = sample.w;
+                    canvas.height = sample.h;
+                    const ctx = canvas.getContext('2d');
+
+                    // Dark technical blueprint background
+                    ctx.fillStyle = '#0d1117';
+                    ctx.fillRect(0, 0, sample.w, sample.h);
+
+                    // Grid
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+                    ctx.lineWidth = 1;
+                    const step = 40;
+                    for (let x = 0; x < sample.w; x += step) {
+                        ctx.beginPath();
+                        ctx.moveTo(x, 0);
+                        ctx.lineTo(sample.h);
+                        ctx.stroke();
+                    }
+                    for (let y = 0; y < sample.h; y += step) {
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(sample.w, y);
+                        ctx.stroke();
+                    }
+
+                    // Geometric accent
+                    ctx.strokeStyle = `hsl(${sample.hue}, 80%, 65%)`;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(sample.w / 2, sample.h / 2, Math.min(sample.w, sample.h) * 0.28, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    // Diagonal telemetry cross
+                    ctx.beginPath();
+                    ctx.moveTo(sample.w * 0.2, sample.h * 0.2);
+                    ctx.lineTo(sample.w * 0.8, sample.h * 0.8);
+                    ctx.moveTo(sample.w * 0.8, sample.h * 0.2);
+                    ctx.lineTo(sample.w * 0.2, sample.h * 0.8);
+                    ctx.stroke();
+
+                    // Text
+                    ctx.fillStyle = '#F4F4F6';
+                    ctx.font = 'bold 36px monospace';
+                    ctx.fillText(`~/ghost/${sample.name}`, 60, 80);
+                    ctx.font = '24px monospace';
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                    ctx.fillText(`${sample.label} · ${sample.w}×${sample.h}`, 60, 120);
+
+                    const dataUrl = canvas.toDataURL('image/png');
+                    const approxBytes = Math.round(dataUrl.length * 0.75);
+
+                    state.items.push({
+                        id: 'sample_' + Date.now() + '_' + idx,
+                        name: sample.name,
+                        size: approxBytes,
+                        type: 'image/png',
+                        width: sample.w,
+                        height: sample.h,
+                        rotation: 0,
+                        previewUrl: dataUrl
+                    });
+                });
+
+                renderQueue();
+                updateTelemetry();
+            });
+
+            clearQueueBtn.addEventListener('click', () => {
+                state.items = [];
+                renderQueue();
+                updateTelemetry();
+                exportSuccessWell.classList.remove('active');
+            });
+
+            // Render Queue
+            function renderQueue() {
+                queueList.innerHTML = '';
+
+                if (state.items.length === 0) {
+                    queueList.appendChild(queueEmptyWell);
+                    clearQueueBtn.style.display = 'none';
+                    compilePdfBtn.classList.add('disabled');
+                    compileSubtext.textContent = 'queue empty · add images first';
+                    return;
+                }
+
+                clearQueueBtn.style.display = 'inline-flex';
+                compilePdfBtn.classList.remove('disabled');
+                compileSubtext.textContent = `ready · ${state.items.length} page${state.items.length > 1 ? 's' : ''} in buffer`;
+
+                state.items.forEach((item, index) => {
+                    const row = document.createElement('div');
+                    row.className = 'queue-row';
+                    row.draggable = true;
+                    row.dataset.index = index;
+
+                    // Formatted index: 01., 02.
+                    const indexStr = String(index + 1).padStart(2, '0') + '.';
+                    const sizeStr = formatBytes(item.size);
+                    const rotStr = `${item.rotation}°`;
+
+                    row.innerHTML = `
+                        <div class="row-drag-handle" title="drag to reorder">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="9" cy="5" r="1"></circle>
+                                <circle cx="9" cy="12" r="1"></circle>
+                                <circle cx="9" cy="19" r="1"></circle>
+                                <circle cx="15" cy="5" r="1"></circle>
+                                <circle cx="15" cy="12" r="1"></circle>
+                                <circle cx="15" cy="19" r="1"></circle>
+                            </svg>
+                        </div>
+                        <div class="row-index">${indexStr}</div>
+                        <div class="row-thumb-container">
+                            <img class="row-thumb" src="${item.previewUrl}" alt="thumb" style="transform: rotate(${item.rotation}deg);">
+                        </div>
+                        <div class="row-meta">
+                            <div class="row-name" title="${item.name}">${item.name}</div>
+                            <div class="sub-branch">↳ ${item.width}×${item.height} · ${sizeStr} · ${rotStr}</div>
+                        </div>
+                        <div class="row-actions">
+                            <button type="button" class="icon-btn btn-rotate" title="rotate 90°">
+                                <svg viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+                            </button>
+                            <button type="button" class="icon-btn btn-up" title="move up" ${index === 0 ? 'disabled style="opacity:0.3;"' : ''}>
+                                <svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                            </button>
+                            <button type="button" class="icon-btn btn-down" title="move down" ${index === state.items.length - 1 ? 'disabled style="opacity:0.3;"' : ''}>
+                                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+                            </button>
+                            <button type="button" class="icon-btn danger btn-remove" title="remove">
+                                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                        </div>
+                    `;
+
+                    // Wire row action buttons
+                    row.querySelector('.btn-rotate').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        item.rotation = (item.rotation + 90) % 360;
+                        renderQueue();
+                    });
+
+                    const btnUp = row.querySelector('.btn-up');
+                    if (index > 0) {
+                        btnUp.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            swapItems(index, index - 1);
+                        });
+                    }
+
+                    const btnDown = row.querySelector('.btn-down');
+                    if (index < state.items.length - 1) {
+                        btnDown.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            swapItems(index, index + 1);
+                        });
+                    }
+
+                    row.querySelector('.btn-remove').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        state.items.splice(index, 1);
+                        renderQueue();
+                        updateTelemetry();
+                    });
+
+                    // Drag and drop reordering
+                    row.addEventListener('dragstart', (e) => {
+                        state.draggedIndex = index;
+                        row.classList.add('dragging');
+                        e.dataTransfer.effectAllowed = 'move';
+                    });
+
+                    row.addEventListener('dragend', () => {
+                        row.classList.remove('dragging');
+                        state.draggedIndex = null;
+                    });
+
+                    row.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                    });
+
+                    row.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const targetIndex = Number(row.dataset.index);
+                        if (state.draggedIndex !== null && state.draggedIndex !== targetIndex) {
+                            const moved = state.items.splice(state.draggedIndex, 1)[0];
+                            state.items.splice(targetIndex, 0, moved);
+                            renderQueue();
+                        }
+                    });
+
+                    queueList.appendChild(row);
+                });
+            }
+
+            function swapItems(i, j) {
+                const temp = state.items[i];
+                state.items[i] = state.items[j];
+                state.items[j] = temp;
+                renderQueue();
+            }
+
+            // Telemetry updates
+            function updateTelemetry() {
+                const count = state.items.length;
+                metricPages.textContent = count;
+
+                let totalBytes = 0;
+                state.items.forEach(it => totalBytes += it.size);
+                // Estimate PDF payload after jpeg compression
+                const estBytes = Math.round(totalBytes * state.quality);
+                metricPayload.textContent = count === 0 ? '0 kb' : formatBytes(estBytes);
+
+                metricCompression.textContent = `${Math.round(state.quality * 100)}%`;
+                metricAuthor.textContent = state.author || 'Ghost';
+
+                const orientationText = state.orientation;
+                activeProfileLabel.textContent = `${state.pageSize.toUpperCase()} · ${orientationText}`;
+
+                if (count === 0) {
+                    badgeQueueText.textContent = 'idle queue';
+                } else {
+                    badgeQueueText.textContent = `${count} page${count > 1 ? 's' : ''} queued`;
+                }
+            }
+
+            function formatBytes(bytes) {
+                if (!bytes || bytes === 0) return '0 kb';
+                if (bytes < 1024) return bytes + ' b';
+                const kb = bytes / 1024;
+                if (kb < 1024) return Math.round(kb) + ' kb';
+                return (kb / 1024).toFixed(1) + ' mb';
+            }
+
+                    })();
+    </script>
+</body>
+</html>
