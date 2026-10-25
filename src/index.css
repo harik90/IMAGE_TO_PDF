@@ -144,6 +144,12 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+html {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+}
+
 body {
   font-family: var(--font-sans);
   font-size: 15px;
@@ -155,6 +161,9 @@ body {
   background-size: var(--grid-size) var(--grid-size);
   color: var(--text-primary);
   min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   -webkit-font-smoothing: antialiased;
@@ -493,16 +502,19 @@ h1, h2, h3, h4 {
 }
 
 .quiet-hero-title {
-  font-size: 30px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.25;
+  font-size: clamp(24px, 5vw, 32px);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .quiet-hero-desc {
-  font-size: 15px;
+  font-size: clamp(14px, 3.5vw, 15px);
   color: var(--text-secondary);
   line-height: 1.6;
+  overflow-wrap: break-word;
 }
 
 /* ==========================================================================
@@ -1877,23 +1889,31 @@ footer.app-footer {
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
+/* ==========================================================================
+   PRODUCTION RESPONSIVE SYSTEM (DESKTOP, TABLET, MOBILE, NARROW)
+   ========================================================================== */
+
 @media (max-width: 860px) {
   .highlight-pair-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .nested-inset-well {
     grid-template-columns: 1fr 1fr;
+    gap: 12px;
   }
 }
 
 @media (max-width: 768px) {
   .tool-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .stats-row {
     grid-template-columns: 1fr 1fr;
+    gap: 10px;
   }
 
   .control-grid {
@@ -1914,8 +1934,181 @@ footer.app-footer {
     border-right: none;
     border-bottom: 1px dotted var(--border-dotted);
   }
+}
+
+@media (max-width: 640px) {
+  .page-container {
+    padding: 22px 14px 44px;
+    gap: 24px;
+  }
+
+  /* Reset card rotation on mobile to completely eliminate horizontal overflow */
+  .tilt-left,
+  .tilt-right {
+    transform: none !important;
+  }
+
+  .highlight-card {
+    padding: 18px 16px;
+    min-height: auto;
+    border-radius: 14px;
+  }
+
+  .highlight-title {
+    font-size: 16.5px;
+  }
+
+  .highlight-desc {
+    font-size: 13px;
+  }
+
+  .quiet-hero {
+    gap: 8px;
+  }
+
+  .quiet-hero-title {
+    font-size: clamp(21px, 6vw, 26px);
+    line-height: 1.25;
+  }
+
+  .quiet-hero-desc {
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+
+  .live-sage-card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .craft-card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .indexed-rows-container {
+    padding: 4px;
+    border-radius: 14px;
+  }
+
+  .indexed-tool-row {
+    padding: 9px 10px;
+  }
+
+  .row-category-badge {
+    display: none;
+  }
+
+  .row-tool-name {
+    font-size: 13.5px;
+  }
+
+  .row-sub-comment {
+    font-size: 11.5px;
+    padding-left: 20px;
+  }
+
+  .footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-inner {
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .header-brand-mono {
+    font-size: 12px;
+  }
+
+  .header-nav-actions {
+    gap: 5px;
+  }
+
+  /* Hide redundant tools link on narrow mobile to ensure 0 overflow */
+  .nav-text-link {
+    display: none;
+  }
+
+  .header-search-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    justify-content: center;
+  }
 
   .header-search-btn .search-btn-label {
+    display: none;
+  }
+
+  .craft-star-btn {
+    padding: 0 8px;
+    height: 28px;
+    gap: 4px;
+  }
+
+  .craft-star-btn .star-text {
+    font-size: 11px;
+  }
+
+  .craft-star-btn .star-live-num {
+    padding-left: 4px;
+    font-size: 10.5px;
+  }
+
+  .header-theme-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .nested-inset-well {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .queue-box {
+    padding: 12px 14px;
+  }
+
+  .queue-row {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .queue-thumb-wrap {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    max-width: 42px;
+    min-height: 42px;
+    max-height: 42px;
+  }
+
+  .queue-name {
+    font-size: 12px;
+  }
+
+  .queue-sub {
+    font-size: 10.5px;
+  }
+
+  .queue-btn {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+@media (max-width: 360px) {
+  .craft-star-btn .star-text {
+    display: none;
+  }
+
+  .mono-path-tilde {
     display: none;
   }
 }
