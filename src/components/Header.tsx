@@ -20,11 +20,11 @@ export const Header: React.FC<Props> = ({ onOpenSearch }) => {
     <header className="app-header">
       <div className="header-inner">
         {/* Left: Brand / Breadcrumb */}
-        <Link to="/" className="header-brand" aria-label="shapedinto home">
+        <Link to="/" className="header-brand" aria-label="image_to_pdf home">
           <div className="header-logo-mark">
             <Sparkles size={14} className="logo-spark" />
           </div>
-          <span className="brand-wordmark">shapedinto</span>
+          <span className="brand-wordmark">image_to_pdf</span>
           {currentTool && (
             <>
               <span className="breadcrumb-sep">/</span>

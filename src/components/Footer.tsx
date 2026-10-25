@@ -8,7 +8,7 @@ export const Footer: React.FC = () => {
     <footer className="app-footer">
       <div className="footer-inner">
         <div className="footer-left">
-          <span className="footer-copy">© shapedinto · Private by design</span>
+          <span className="footer-copy">© image_to_pdf · Private by design</span>
           <span className="footer-sep">·</span>
           <span className="footer-privacy-note">
             <ShieldCheck size={13} className="footer-shield" />

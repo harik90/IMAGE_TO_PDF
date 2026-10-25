@@ -9,7 +9,7 @@ interface Props {
   onClose: () => void;
 }
 
-const RECENT_KEY = 'shapedinto_recent_tools';
+const RECENT_KEY = 'image_to_pdf_recent_tools';
 
 export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
   const [query, setQuery] = useState('');

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 export type ThemeMode = 'system' | 'dark' | 'light';
 
-const THEME_KEY = 'shapedinto_theme';
+const THEME_KEY = 'image_to_pdf_theme';
 
 export function getSystemTheme(): 'dark' | 'light' {
   if (typeof window === 'undefined') return 'dark';
@@ -12,14 +12,21 @@ export function getSystemTheme(): 'dark' | 'light' {
 export function useTheme() {
   const [theme, setThemeState] = useState<ThemeMode>(() => {
     try {
-      return (localStorage.getItem(THEME_KEY) as ThemeMode) || 'system';
+      return (
+        (localStorage.getItem(THEME_KEY) as ThemeMode) ||
+        (localStorage.getItem('shapedinto_theme') as ThemeMode) ||
+        'system'
+      );
     } catch {
       return 'system';
     }
   });
 
   const [resolvedTheme, setResolvedTheme] = useState<'dark' | 'light'>(() => {
-    const saved = typeof window !== 'undefined' ? localStorage.getItem(THEME_KEY) : null;
+    const saved =
+      typeof window !== 'undefined'
+        ? localStorage.getItem(THEME_KEY) || localStorage.getItem('shapedinto_theme')
+        : null;
     if (saved === 'dark' || saved === 'light') return saved;
     return getSystemTheme();
   });

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>shapedinto — private by design client-side tools</title>
+  <title>image_to_pdf — private by design client-side tools</title>
   <meta name="description" content="refined, private, client-side image and pdf utilities. zero server uploads, zero tracking.">
   <meta name="theme-color" content="#0c0e0d">
 
@@ -19,7 +19,7 @@
   <script>
     (function() {
       try {
-        var theme = localStorage.getItem('shapedinto_theme') || 'system';
+        var theme = localStorage.getItem('image_to_pdf_theme') || localStorage.getItem('shapedinto_theme') || 'system';
         var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
       } catch (e) {}

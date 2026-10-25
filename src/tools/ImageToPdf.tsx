@@ -110,7 +110,7 @@ export const ImageToPdfTool: React.FC = () => {
       const pdfDoc = await PDFDocument.create();
       if (authorName.trim()) {
         pdfDoc.setAuthor(authorName.trim());
-        pdfDoc.setCreator('shapedinto / image-to-pdf');
+        pdfDoc.setCreator('image_to_pdf / client-side');
       }
 
       for (let i = 0; i < files.length; i++) {

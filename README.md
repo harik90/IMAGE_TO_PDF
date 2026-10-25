@@ -1,10 +1,10 @@
-# shapedinto
+# image_to_pdf
 
 a 100% client-side, zero-telemetry multi-tool web utility for images and pdfs.
 
 ## why
 
-conventional online file converters upload personal scans, invoices, and sensitive documents to third-party servers. shapedinto runs entirely in memory inside your browser using wasm and canvas, ensuring absolute privacy and instantaneous throughput.
+conventional online file converters upload personal scans, invoices, and sensitive documents to third-party servers. image_to_pdf runs entirely in memory inside your browser using wasm and canvas, ensuring absolute privacy and instantaneous throughput.
 
 ## run
 

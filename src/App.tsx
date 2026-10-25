@@ -13,8 +13,8 @@ const RouteObserver: React.FC = () => {
     window.scrollTo(0, 0);
     const activeTool = toolsRegistry.find(t => t.route === location.pathname);
     document.title = activeTool
-      ? `${activeTool.name} — shapedinto (100% private)`
-      : 'shapedinto — 100% private, client-side file tools';
+      ? `${activeTool.name} — image_to_pdf (100% private)`
+      : 'image_to_pdf — 100% private, client-side file tools';
   }, [location.pathname]);
 
   return null;

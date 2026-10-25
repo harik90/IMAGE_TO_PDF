@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 
 const REPO_URL = 'https://github.com/harik90/IMAGE_TO_PDF';
 const API_URL = 'https://api.github.com/repos/harik90/IMAGE_TO_PDF';
-const CACHE_KEY = 'shapedinto_stars';
-const CACHE_TS_KEY = 'shapedinto_stars_ts';
+const CACHE_KEY = 'image_to_pdf_stars';
+const CACHE_TS_KEY = 'image_to_pdf_stars_ts';
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 export function formatStarCount(count: number): string {
