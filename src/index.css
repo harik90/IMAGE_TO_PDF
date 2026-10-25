@@ -6,9 +6,9 @@
 
 :root,
 :root[data-theme="dark"] {
-  /* Canvas & Grid (24px line grid) */
-  --bg-canvas: #0C0D10;
-  --bg-grid: rgba(255, 255, 255, 0.04);
+  /* Canvas & Grid (Deep Obsidian Black + 24px line grid) */
+  --bg-canvas: #060709;
+  --bg-grid: rgba(255, 255, 255, 0.032);
   --grid-size: 24px;
 
   /* Typography */
@@ -21,40 +21,40 @@
   --text-secondary: #9AA0AC;
   --text-muted: #6B7180;
 
-  /* Surfaces & Wells */
-  --surface-float: rgba(20, 21, 26, 0.85);
-  --surface-solid: #14151A;
-  --surface-card: #16181F;
-  --surface-card-hover: #1A1D25;
-  --surface-well: rgba(0, 0, 0, 0.35);
-  --surface-elevated: #1B1D24;
+  /* Surfaces & Wells (Deep obsidian and charcoal) */
+  --surface-float: rgba(10, 11, 15, 0.85);
+  --surface-solid: #0A0B0E;
+  --surface-card: #0D0E13;
+  --surface-card-hover: #121319;
+  --surface-well: rgba(0, 0, 0, 0.50);
+  --surface-elevated: #101116;
 
-  /* Tactile Dotted Borders */
-  --border-dim: rgba(255, 255, 255, 0.07);
-  --border-subtle: rgba(255, 255, 255, 0.12);
+  /* Tactile Spaced Borders */
+  --border-dim: rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.10);
   --border-dotted: rgba(255, 255, 255, 0.16);
-  --border-dotted-strong: rgba(255, 255, 255, 0.28);
-  --border-dashed: rgba(255, 255, 255, 0.20);
+  --border-dotted-strong: rgba(255, 255, 255, 0.26);
+  --border-dashed: rgba(255, 255, 255, 0.22);
   --border-focus: rgba(130, 215, 170, 0.7);
 
-  /* Tinted Cards: Sand, Iris, Sage */
-  --sand-bg: rgba(130, 98, 40, 0.20);
-  --sand-border: rgba(235, 190, 100, 0.32);
-  --sand-text: #FBEFD3;
+  /* Tinted Cards: Sand, Iris, Sage (Refined dark tint depths) */
+  --sand-bg: rgba(92, 58, 16, 0.18);
+  --sand-border: rgba(245, 175, 75, 0.26);
+  --sand-text: #FDE8B5;
 
-  --iris-bg: rgba(70, 60, 150, 0.22);
-  --iris-border: rgba(160, 150, 255, 0.32);
-  --iris-text: #E6E3FF;
+  --iris-bg: rgba(58, 44, 118, 0.20);
+  --iris-border: rgba(160, 145, 255, 0.26);
+  --iris-text: #EDE9FE;
 
-  --sage-bg: rgba(40, 90, 70, 0.22);
-  --sage-border: rgba(130, 215, 170, 0.32);
-  --sage-text: #DDF6E8;
-  --sage-dot: #82D7AA;
+  --sage-bg: rgba(18, 62, 42, 0.20);
+  --sage-border: rgba(82, 210, 150, 0.26);
+  --sage-text: #D1FAE5;
+  --sage-dot: #4ADE80;
 
   /* Accent & Elevation */
   --accent-mint: #3ddc97;
-  --shadow-craft: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 30px -10px rgba(0, 0, 0, 0.5);
-  --shadow-popover: 0 20px 50px -10px rgba(0, 0, 0, 0.85);
+  --shadow-craft: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 30px -10px rgba(0, 0, 0, 0.65);
+  --shadow-popover: 0 20px 50px -10px rgba(0, 0, 0, 0.90);
 
   /* Radii */
   --radius-card: 18px;
@@ -69,67 +69,67 @@
 
 :root[data-theme="light"] {
   /* Canvas & Grid (24px line grid) */
-  --bg-canvas: #F7F5F0;
-  --bg-grid: rgba(0, 0, 0, 0.04);
+  --bg-canvas: #FAF9F6;
+  --bg-grid: rgba(0, 0, 0, 0.035);
   --grid-size: 24px;
 
   /* Text Contrast Hierarchy (Min 4.5:1 ratio) */
-  --text-primary: #16171B;
-  --text-secondary: #555A66;
-  --text-muted: #7A7F8C;
+  --text-primary: #121316;
+  --text-secondary: #525660;
+  --text-muted: #747986;
 
   /* Surfaces & Wells */
   --surface-float: rgba(255, 255, 255, 0.90);
   --surface-solid: #FFFFFF;
   --surface-card: #FFFFFF;
-  --surface-card-hover: #F8F6F1;
+  --surface-card-hover: #F6F4EE;
   --surface-well: #EFECE4;
   --surface-elevated: #FFFFFF;
 
-  /* Tactile Dotted Borders */
-  --border-dim: rgba(0, 0, 0, 0.07);
-  --border-subtle: rgba(0, 0, 0, 0.12);
-  --border-dotted: rgba(0, 0, 0, 0.18);
-  --border-dotted-strong: rgba(0, 0, 0, 0.30);
-  --border-dashed: rgba(0, 0, 0, 0.22);
+  /* Tactile Spaced Borders */
+  --border-dim: rgba(0, 0, 0, 0.06);
+  --border-subtle: rgba(0, 0, 0, 0.10);
+  --border-dotted: rgba(0, 0, 0, 0.16);
+  --border-dotted-strong: rgba(0, 0, 0, 0.26);
+  --border-dashed: rgba(0, 0, 0, 0.20);
   --border-focus: rgba(31, 90, 64, 0.7);
 
   /* Tinted Cards: Sand, Iris, Sage */
   --sand-bg: #FDF6E3;
-  --sand-border: #F1DEA8;
+  --sand-border: #E8D293;
   --sand-text: #6B4A0E;
 
   --iris-bg: #F1EFFF;
-  --iris-border: #D4CFFF;
+  --iris-border: #C8C1FA;
   --iris-text: #3B2F8F;
 
   --sage-bg: #EBF8F0;
-  --sage-border: #BFE6D0;
+  --sage-border: #B2DEC4;
   --sage-text: #1F5A40;
   --sage-dot: #1F5A40;
 
   /* Accent & Elevation */
   --accent-mint: #059669;
-  --shadow-craft: inset 0 1px 0 #FFFFFF, 0 10px 26px -10px rgba(20, 24, 40, 0.10);
-  --shadow-popover: 0 18px 40px -8px rgba(20, 24, 40, 0.18);
+  --shadow-craft: inset 0 1px 0 #FFFFFF, 0 10px 26px -10px rgba(20, 24, 40, 0.08);
+  --shadow-popover: 0 18px 40px -8px rgba(20, 24, 40, 0.16);
 }
 
 /* Backwards compatibility color mapping */
 .card-amber {
   background-color: var(--sand-bg) !important;
-  border: 1.5px dotted var(--sand-border) !important;
+  border: 1.5px dashed var(--sand-border) !important;
   color: var(--sand-text) !important;
 }
 
 .card-indigo {
   background-color: var(--iris-bg) !important;
-  border: 1.5px dotted var(--iris-border) !important;
+  border: 1.5px dashed var(--iris-border) !important;
   color: var(--iris-text) !important;
 }
 
 .card-green {
   background-color: var(--sage-bg) !important;
-  border: 1.5px dotted var(--sage-border) !important;
+  border: 1.5px dashed var(--sage-border) !important;
   color: var(--sage-text) !important;
 }
 
@@ -156,9 +156,13 @@ body {
   line-height: 1.6;
   background-color: var(--bg-canvas);
   background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 255, 255, 0.038), transparent 70%),
     linear-gradient(to right, var(--bg-grid) 1px, transparent 1px),
     linear-gradient(to bottom, var(--bg-grid) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
+  background-size: 100% 700px, var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size);
+  background-repeat: no-repeat, repeat, repeat;
+  background-position: top center, 0 0, 0 0;
+  background-attachment: fixed;
   color: var(--text-primary);
   min-height: 100vh;
   width: 100%;
@@ -168,6 +172,13 @@ body {
   flex-direction: column;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:root[data-theme="light"] body {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0, 0, 0, 0.02), transparent 70%),
+    linear-gradient(to right, var(--bg-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--bg-grid) 1px, transparent 1px);
 }
 
 a {
@@ -431,7 +442,7 @@ h1, h2, h3, h4 {
   top: calc(100% + 6px);
   width: 124px;
   background: var(--surface-elevated);
-  border: 1.5px dotted var(--border-dotted);
+  border: 1.5px dashed var(--border-dotted-strong);
   border-radius: var(--radius-card);
   padding: 4px;
   box-shadow: var(--shadow-popover);
@@ -551,19 +562,19 @@ h1, h2, h3, h4 {
 
 .card-sand {
   background-color: var(--sand-bg);
-  border: 1.5px dotted var(--sand-border);
+  border: 1.5px dashed var(--sand-border);
   color: var(--sand-text);
 }
 
 .card-iris {
   background-color: var(--iris-bg);
-  border: 1.5px dotted var(--iris-border);
+  border: 1.5px dashed var(--iris-border);
   color: var(--iris-text);
 }
 
 .card-sage {
   background-color: var(--sage-bg);
-  border: 1.5px dotted var(--sage-border);
+  border: 1.5px dashed var(--sage-border);
   color: var(--sage-text);
 }
 
@@ -648,7 +659,7 @@ h1, h2, h3, h4 {
   font-size: 11px;
   opacity: 0.8;
   padding-top: 8px;
-  border-top: 1px dotted rgba(255, 255, 255, 0.16);
+  border-top: 1px dashed rgba(255, 255, 255, 0.16);
 }
 
 :root[data-theme="light"] .card-action-bar {
@@ -700,7 +711,7 @@ h1, h2, h3, h4 {
 
 .nested-inset-well {
   background: var(--surface-well);
-  border: 1px dotted var(--border-dotted);
+  border: 1px dashed var(--border-subtle);
   border-radius: var(--radius-well);
   padding: 14px 18px;
   display: grid;
@@ -747,7 +758,7 @@ h1, h2, h3, h4 {
   flex-direction: column;
   gap: 4px;
   background: var(--surface-card);
-  border: 1.5px dotted var(--border-dotted);
+  border: 1.5px dashed var(--border-dashed);
   border-radius: var(--radius-card);
   padding: 8px;
   box-shadow: var(--shadow-craft);
@@ -942,6 +953,8 @@ footer.app-footer {
   gap: 14px;
   box-shadow: var(--shadow-craft);
   position: relative;
+  background-color: var(--surface-card);
+  border: 1.5px dashed var(--border-subtle);
 }
 
 .card-topline {
@@ -989,7 +1002,7 @@ footer.app-footer {
    ========================================================================== */
 
 .dropzone-dashed {
-  border: 2px dotted var(--border-dotted-strong);
+  border: 2px dashed var(--border-dotted-strong);
   background: var(--surface-well);
   border-radius: var(--radius-well);
   padding: 24px 16px;
@@ -1136,7 +1149,7 @@ footer.app-footer {
 
 .status-box {
   background: var(--surface-well);
-  border: 1.5px dotted var(--border-dotted);
+  border: 1.5px dashed var(--border-dotted);
   border-radius: var(--radius-well);
   padding: 10px 14px;
   font-family: var(--font-mono);
@@ -1233,7 +1246,7 @@ footer.app-footer {
 
 .queue-box {
   background: var(--surface-card);
-  border: 1.5px dotted var(--border-dotted);
+  border: 1.5px dashed var(--border-dashed);
   border-radius: var(--radius-card);
   padding: 16px 20px;
   display: flex;
@@ -1248,7 +1261,7 @@ footer.app-footer {
   align-items: center;
   justify-content: space-between;
   padding-bottom: 10px;
-  border-bottom: 1px dotted var(--border-dotted);
+  border-bottom: 1px dashed var(--border-dotted);
   flex-wrap: wrap;
   gap: 8px;
 }
@@ -1413,7 +1426,7 @@ footer.app-footer {
 /* Tool info card */
 .tool-info-card {
   background: var(--surface-card);
-  border: 1.5px dotted var(--border-dotted);
+  border: 1.5px dashed var(--border-dashed);
   border-radius: var(--radius-card);
   padding: 18px 20px;
   display: flex;
@@ -1460,7 +1473,7 @@ footer.app-footer {
   max-width: 580px;
   max-height: 85vh;
   background: var(--surface-solid);
-  border: 1.5px dotted var(--border-dotted-strong);
+  border: 1.5px dashed var(--border-dotted-strong);
   border-radius: var(--radius-dialog);
   box-shadow: var(--shadow-popover);
   overflow: hidden;
@@ -1640,7 +1653,7 @@ footer.app-footer {
 
 .ocr-viewer-card {
   background: var(--surface-card);
-  border: 1.5px dotted var(--border-dotted);
+  border: 1.5px dashed var(--border-dashed);
   border-radius: var(--radius-card);
   overflow: hidden;
   display: flex;
@@ -1855,7 +1868,7 @@ footer.app-footer {
   margin-top: 12px;
   padding: 18px 20px;
   background: var(--surface-card);
-  border: 1.5px dotted var(--border-dotted);
+  border: 1.5px dashed var(--border-dashed);
   border-radius: var(--radius-card);
   display: flex;
   flex-direction: column;
