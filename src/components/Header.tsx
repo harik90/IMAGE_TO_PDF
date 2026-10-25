@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { toolsRegistry } from '../tools/registry';
+import { Search, ChevronDown, Sparkles } from 'lucide-react';
+import { MoreMenu } from './MoreMenu';
+import { GitHubStarButton } from './GitHubStarButton';
+import { ThemeToggle } from './ThemeToggle';
 
 interface Props {
   onOpenSearch: () => void;
@@ -9,42 +13,76 @@ interface Props {
 export const Header: React.FC<Props> = ({ onOpenSearch }) => {
   const location = useLocation();
   const currentTool = toolsRegistry.find(t => t.route === location.pathname);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const moreTriggerRef = useRef<HTMLButtonElement>(null);
 
   return (
     <header className="app-header">
       <div className="header-inner">
-        <Link to="/" className="header-brand">
-          <span className="root-name">~/shapedinto</span>
-          <span className="sep">/</span>
-          <span className="tool-name">
-            {currentTool ? currentTool.id : 'home'}
-          </span>
+        {/* Left: Brand / Breadcrumb */}
+        <Link to="/" className="header-brand" aria-label="shapedinto home">
+          <div className="header-logo-mark">
+            <Sparkles size={14} className="logo-spark" />
+          </div>
+          <span className="brand-wordmark">shapedinto</span>
+          {currentTool && (
+            <>
+              <span className="breadcrumb-sep">/</span>
+              <span className="breadcrumb-tool" title={currentTool.name}>
+                {currentTool.name}
+              </span>
+            </>
+          )}
         </Link>
 
-        <div className="header-actions">
-          <button
-            onClick={onOpenSearch}
-            className="pill-btn"
-            aria-label="Search tools"
+        {/* Right: Nav Actions */}
+        <nav className="header-nav-actions" aria-label="Main navigation">
+          {/* 1. Tools */}
+          <Link
+            to="/"
+            className={`nav-text-link ${location.pathname === '/' ? 'active' : ''}`}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <span>search</span>
-            <kbd>⌘K</kbd>
-          </button>
-
-          <Link to="/" className={`pill-btn ${location.pathname === '/' ? 'active' : ''}`}>
-            <span>all tools</span>
+            Tools
           </Link>
 
-          <div className="privacy-badge" style={{ padding: '4px 10px', fontSize: '10px' }}>
-            <span className="pulse-dot"></span>
-            <span>100% client-side</span>
-          </div>
-        </div>
+          {/* 2. More ▾ */}
+          <button
+            ref={moreTriggerRef}
+            type="button"
+            className={`nav-more-btn ${isMoreOpen ? 'active' : ''}`}
+            onClick={() => setIsMoreOpen(prev => !prev)}
+            aria-expanded={isMoreOpen}
+            aria-label="More tools menu"
+          >
+            <span>More</span>
+            <ChevronDown size={14} className={`chevron-icon ${isMoreOpen ? 'open' : ''}`} />
+          </button>
+
+          {/* 3. Search */}
+          <button
+            type="button"
+            onClick={onOpenSearch}
+            className="header-search-btn"
+            aria-label="Search tools (Command K)"
+          >
+            <Search size={14} />
+            <span className="search-btn-label">Search</span>
+            <kbd className="search-shortcut">⌘K</kbd>
+          </button>
+
+          {/* 4. GitHub Star Button */}
+          <GitHubStarButton />
+
+          {/* 5. Theme Toggle */}
+          <ThemeToggle />
+        </nav>
       </div>
+
+      <MoreMenu
+        isOpen={isMoreOpen}
+        onClose={() => setIsMoreOpen(false)}
+        triggerRef={moreTriggerRef}
+      />
     </header>
   );
 };

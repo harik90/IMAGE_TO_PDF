@@ -25,11 +25,30 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd/Ctrl + K
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setIsSearchOpen(prev => !prev);
+        return;
+      }
+
+      // Single "/" key when not typing in an input
+      if (e.key === '/') {
+        const target = e.target as HTMLElement | null;
+        const isEditable =
+          target &&
+          (target.tagName === 'INPUT' ||
+            target.tagName === 'TEXTAREA' ||
+            target.tagName === 'SELECT' ||
+            target.isContentEditable);
+
+        if (!isEditable) {
+          e.preventDefault();
+          setIsSearchOpen(true);
+        }
       }
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
@@ -49,12 +68,12 @@ export const App: React.FC = () => {
           }
         >
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<HomePage onOpenSearch={() => setIsSearchOpen(true)} />} />
             {toolsRegistry.map(tool => {
               const Component = tool.component;
               return <Route key={tool.id} path={tool.route} element={<Component />} />;
             })}
-            <Route path="*" element={<HomePage />} />
+            <Route path="*" element={<HomePage onOpenSearch={() => setIsSearchOpen(true)} />} />
           </Routes>
         </Suspense>
       </main>

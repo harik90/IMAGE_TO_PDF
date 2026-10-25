@@ -1,14 +1,16 @@
-import React, { ReactNode } from 'react';
+import { ReactNode, ComponentType } from 'react';
 
 export interface ToolDef {
   id: string;
   name: string;
   description: string;
   keywords: string[];
-  icon: (props?: { className?: string }) => ReactNode;
+  icon: (props?: { className?: string; size?: number }) => ReactNode;
   route: string;
-  accent: 'amber' | 'indigo' | 'green';
-  component: React.ComponentType;
+  accent?: 'amber' | 'indigo' | 'green';
+  featured?: boolean;
+  category: 'pdf' | 'image' | 'text';
+  component: ComponentType;
   howItWorks?: string;
   faq?: string;
 }

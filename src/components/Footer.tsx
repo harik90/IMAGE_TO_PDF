@@ -1,17 +1,24 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { GitHubStarButton } from './GitHubStarButton';
+import { ThemeToggle } from './ThemeToggle';
+import { ShieldCheck } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
     <footer className="app-footer">
       <div className="footer-inner">
-        <div>
-          <span>shapedinto · 100% private client-side utilities.</span>
-          <span style={{ marginLeft: '8px', color: 'var(--mint-primary)' }}>No signup. No limits. Free.</span>
+        <div className="footer-left">
+          <span className="footer-copy">© shapedinto · Private by design</span>
+          <span className="footer-sep">·</span>
+          <span className="footer-privacy-note">
+            <ShieldCheck size={13} className="footer-shield" />
+            Your files never leave your device. The only network request is the public GitHub star count.
+          </span>
         </div>
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <Link to="/" style={{ textDecoration: 'underline dotted', color: 'var(--text-secondary)' }}>all tools ↗</Link>
-          <span style={{ color: 'var(--text-muted)' }}>zero network telemetry</span>
+
+        <div className="footer-right">
+          <GitHubStarButton compact />
+          <ThemeToggle />
         </div>
       </div>
     </footer>
