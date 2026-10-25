@@ -14,19 +14,25 @@ export const GitHubStarButton: React.FC<GitHubStarButtonProps> = ({
   className = '',
   compact = false
 }) => {
-  const { stars, repoUrl, hasUpdated } = useGitHubStars({ owner, repo, pollIntervalMs: 20000 });
+  const { stars, repoUrl, hasUpdated, refresh } = useGitHubStars({ owner, repo, pollIntervalMs: 15000 });
   const formattedCount = stars !== null ? formatStarCount(stars) : '2';
+
+  const handleClick = () => {
+    // Refresh immediately after opening repo
+    setTimeout(() => refresh(), 1000);
+  };
 
   return (
     <a
       href={repoUrl}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={handleClick}
       className={`craft-star-btn ${compact ? 'compact' : ''} ${hasUpdated ? 'updated-pulse' : ''} ${className}`}
       title={`Star ${owner}/${repo} on GitHub · Live: ${formattedCount} stars`}
       aria-label={`GitHub Repository ${owner}/${repo} - ${formattedCount} stars`}
     >
-      {/* Zero external dependencies: inline 1.75px SVG star with subtle amber tint */}
+      {/* Zero external dependencies: inline 1.75px SVG star */}
       <svg
         width="13"
         height="13"
