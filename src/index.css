@@ -325,16 +325,6 @@ h1, h2, h3, h4 {
   background: var(--surface-card);
 }
 
-.search-shortcut {
-  font-family: var(--font-mono);
-  font-size: 9.5px;
-  padding: 1px 4px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px dotted var(--border-dotted);
-  color: var(--text-muted);
-}
-
 /* Realtime Craft Star Button in Top Bar */
 .craft-star-btn {
   display: inline-flex;
@@ -1925,8 +1915,7 @@ footer.app-footer {
     border-bottom: 1px dotted var(--border-dotted);
   }
 
-  .header-search-btn .search-btn-label,
-  .header-search-btn .search-shortcut {
+  .header-search-btn .search-btn-label {
     display: none;
   }
 }

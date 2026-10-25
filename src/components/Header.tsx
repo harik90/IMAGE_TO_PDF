@@ -45,11 +45,10 @@ export const Header: React.FC<Props> = ({ onOpenSearch }) => {
             type="button"
             onClick={onOpenSearch}
             className="header-search-btn"
-            aria-label="Search tools (Command K)"
+            aria-label="Search tools"
           >
             <Search size={13} strokeWidth={1.75} />
             <span className="search-btn-label">search</span>
-            <kbd className="search-shortcut">⌘K</kbd>
           </button>
 
           {/* 3. Live GitHub Star Button */}
