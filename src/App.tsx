@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { CommandPalette } from './components/CommandPalette';
@@ -55,7 +55,7 @@ export const App: React.FC = () => {
   }, []);
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <RouteObserver />
       <Header onOpenSearch={() => setIsSearchOpen(true)} />
 
@@ -82,6 +82,6 @@ export const App: React.FC = () => {
       <Footer />
       <MobilePillNav onOpenSearch={() => setIsSearchOpen(true)} />
       <CommandPalette isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-    </BrowserRouter>
+    </HashRouter>
   );
 };
