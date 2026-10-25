@@ -1,5 +1,4 @@
 import React, { ReactNode } from 'react';
-import { PrivacyBadge } from './PrivacyBadge';
 
 interface Props {
   title: string;
@@ -29,19 +28,18 @@ export const ToolLayout: React.FC<Props> = ({
           <h1 className="tool-title">{title}</h1>
           <p className="tool-desc">{description}</p>
         </div>
-        <PrivacyBadge />
       </div>
 
       <div className="tool-grid">
-        <div className="craft-card card-amber">
+        <div className="craft-card card-sand">
           {amberCardContent}
         </div>
 
-        <div className="craft-card card-indigo">
+        <div className="craft-card card-iris">
           {indigoCardContent}
         </div>
 
-        <div className="craft-card card-green tool-grid-full">
+        <div className="craft-card card-sage tool-grid-full">
           {greenCardContent}
         </div>
       </div>
@@ -62,7 +60,7 @@ export const ToolLayout: React.FC<Props> = ({
           )}
           {faq && (
             <div style={{ borderTop: '1px dashed var(--border-dim)', paddingTop: '10px' }}>
-              <div className="tool-info-heading">FAQ &amp; Security</div>
+              <div className="tool-info-heading">Security &amp; Processing</div>
               <div className="tool-info-body" style={{ color: 'var(--text-muted)' }}>{faq}</div>
             </div>
           )}
