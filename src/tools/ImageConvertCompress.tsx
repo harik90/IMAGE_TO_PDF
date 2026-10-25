@@ -202,8 +202,8 @@ export const ImageConvertCompressTool: React.FC = () => {
           <Dropzone
             accept="image/*"
             onFilesSelected={handleFilesSelected}
-            title="Select images to compress"
-            subtitle="JPG · PNG · WEBP · BMP"
+            title={files.length > 0 ? `${files.length} image${files.length > 1 ? 's' : ''} queued` : "Select images to compress"}
+            subtitle={files.length > 0 ? "Drop more to add to batch" : "JPG · PNG · WEBP · BMP"}
           />
 
           {files.length > 0 && (
@@ -349,35 +349,49 @@ export const ImageConvertCompressTool: React.FC = () => {
       fileSequenceContent={
         processed.length > 0 ? (
           <div className="queue-box">
-            <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-              Processed Results ({processed.length} files)
+            <div className="queue-box-header">
+              <div className="queue-box-title-group">
+                <span className="queue-box-title">Processed Results</span>
+                <span className="queue-box-count">({processed.length} files converted &amp; compressed)</span>
+              </div>
+              <span className="accent-script-note">*(click to download individual files)*</span>
             </div>
-            {processed.map((item, idx) => {
-              const diff = item.originalSize - item.newSize;
-              const pct = item.originalSize > 0 ? Math.round((diff / item.originalSize) * 100) : 0;
-              return (
-                <div key={idx} className="queue-row">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
-                    <img src={item.previewUrl} alt={item.name} className="queue-thumb" />
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {item.name}
+
+            <div className="queue-list">
+              {processed.map((item, idx) => {
+                const diff = item.originalSize - item.newSize;
+                const pct = item.originalSize > 0 ? Math.round((diff / item.originalSize) * 100) : 0;
+                return (
+                  <div key={idx} className="queue-row">
+                    <div className="queue-row-left">
+                      <div className="queue-thumb-wrap">
+                        <img src={item.previewUrl} alt={item.name} className="queue-thumb" />
                       </div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                        ↳ {formatBytes(item.originalSize)} → {formatBytes(item.newSize)} ({pct >= 0 ? `${pct}% smaller` : `${Math.abs(pct)}% larger`})
+                      <div className="queue-meta">
+                        <div className="queue-name" title={item.name}>
+                          {item.name}
+                        </div>
+                        <div className="queue-sub">
+                          <span>{formatBytes(item.originalSize)} → {formatBytes(item.newSize)}</span>
+                          <span style={{ color: pct >= 0 ? 'var(--accent-mint)' : '#f59e0b' }}>
+                            ({pct >= 0 ? `${pct}% smaller` : `${Math.abs(pct)}% larger`})
+                          </span>
+                        </div>
                       </div>
                     </div>
+                    <div className="queue-actions">
+                      <button
+                        type="button"
+                        onClick={() => downloadBlob(item.blob, item.name)}
+                        className="btn-secondary-compact"
+                      >
+                        download ↗
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    onClick={() => downloadBlob(item.blob, item.name)}
-                    className="btn-secondary"
-                    style={{ padding: '6px 12px' }}
-                  >
-                    download
-                  </button>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         ) : undefined
       }

@@ -4,6 +4,7 @@ import { ToolLayout } from '../components/ToolLayout';
 import { Dropzone } from '../components/Dropzone';
 import { formatBytes, validateFileSize, validateFileType, downloadBlob } from '../utils/file';
 import { QueuedFile } from '../types';
+import { ArrowUp, ArrowDown, RotateCw, X } from 'lucide-react';
 
 export const ImageToPdfTool: React.FC = () => {
   const [files, setFiles] = useState<QueuedFile[]>([]);
@@ -149,9 +150,17 @@ export const ImageToPdfTool: React.FC = () => {
         ctx.restore();
 
         // Convert to high efficiency JPEG blob
-        const jpegDataUrl = canvas.toDataURL('image/jpeg', quality);
-        const jpegBytes = await fetch(jpegDataUrl).then(r => r.arrayBuffer());
+        const pageBlob = await new Promise<Blob>((res, rej) => {
+          canvas.toBlob(
+            b => (b ? res(b) : rej(new Error(`Failed to encode image "${item.name}"`))),
+            'image/jpeg',
+            quality
+          );
+        });
+        const jpegBytes = await pageBlob.arrayBuffer();
         const embeddedImage = await pdfDoc.embedJpg(jpegBytes);
+        canvas.width = 0;
+        canvas.height = 0;
 
         // Determine Page Size & Orientation in Points (72 pt = 1 inch)
         let pageW = targetW;
@@ -248,8 +257,8 @@ export const ImageToPdfTool: React.FC = () => {
           <Dropzone
             accept="image/*"
             onFilesSelected={handleFilesSelected}
-            title="Select images or drop anywhere"
-            subtitle="JPG · PNG · WEBP · GIF · SVG · BMP"
+            title={files.length > 0 ? `${files.length} image${files.length > 1 ? 's' : ''} queued` : "Select images or drop anywhere"}
+            subtitle={files.length > 0 ? `${formatBytes(totalBytes)} total · drop more to append` : "JPG · PNG · WEBP · GIF · SVG · BMP"}
           />
 
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
@@ -345,7 +354,7 @@ export const ImageToPdfTool: React.FC = () => {
               <input
                 type="text"
                 className="craft-input"
-                placeholder="Your name"
+                placeholder="John Doe"
                 value={authorName}
                 onChange={e => setAuthorName(e.target.value)}
               />
@@ -428,69 +437,83 @@ export const ImageToPdfTool: React.FC = () => {
       fileSequenceContent={
         files.length > 0 ? (
           <div className="queue-box">
-            <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-              Page Sequence ({files.length} images)
+            <div className="queue-box-header">
+              <div className="queue-box-title-group">
+                <span className="queue-box-title">Page Sequence</span>
+                <span className="queue-box-count">({files.length} images · {formatBytes(totalBytes)})</span>
+              </div>
+              <span className="accent-script-note">*(reorder pages before compilation)*</span>
             </div>
-            {files.map((item, index) => (
-              <div key={item.id} className="queue-row">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)', width: '24px' }}>
-                    {String(index + 1).padStart(2, '0')}.
-                  </span>
-                  <img
-                    src={item.previewUrl}
-                    alt={item.name}
-                    className="queue-thumb"
-                    style={{ transform: `rotate(${item.rotation || 0}deg)` }}
-                  />
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {item.name}
+
+            <div className="queue-list">
+              {files.map((item, index) => (
+                <div key={item.id} className="queue-row">
+                  <div className="queue-row-left">
+                    <span className="queue-idx">
+                      {String(index + 1).padStart(2, '0')}.
+                    </span>
+                    <div className="queue-thumb-wrap">
+                      <img
+                        src={item.previewUrl}
+                        alt={item.name}
+                        className="queue-thumb"
+                        style={{ transform: `rotate(${item.rotation || 0}deg)` }}
+                      />
                     </div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                      ↳ {formatBytes(item.size)} · {item.rotation || 0}° rotation
+                    <div className="queue-meta">
+                      <div className="queue-name" title={item.name}>
+                        {item.name}
+                      </div>
+                      <div className="queue-sub">
+                        <span>{formatBytes(item.size)}</span>
+                        {item.rotation ? <span>· {item.rotation}° rotation</span> : null}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                  <button
-                    onClick={() => handleMove(index, 'up')}
-                    disabled={index === 0}
-                    className="btn-secondary"
-                    style={{ padding: '6px 8px' }}
-                    title="Move up"
-                  >
-                    ↑
-                  </button>
-                  <button
-                    onClick={() => handleMove(index, 'down')}
-                    disabled={index === files.length - 1}
-                    className="btn-secondary"
-                    style={{ padding: '6px 8px' }}
-                    title="Move down"
-                  >
-                    ↓
-                  </button>
-                  <button
-                    onClick={() => handleRotate(index)}
-                    className="btn-secondary"
-                    style={{ padding: '6px 8px' }}
-                    title="Rotate 90°"
-                  >
-                    ↻
-                  </button>
-                  <button
-                    onClick={() => handleRemove(index)}
-                    className="btn-secondary"
-                    style={{ padding: '6px 8px', color: '#ef4444' }}
-                    title="Remove"
-                  >
-                    ✕
-                  </button>
+                  <div className="queue-actions">
+                    <button
+                      type="button"
+                      onClick={() => handleMove(index, 'up')}
+                      disabled={index === 0}
+                      className="queue-btn"
+                      title="Move page up"
+                      aria-label="Move up"
+                    >
+                      <ArrowUp size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleMove(index, 'down')}
+                      disabled={index === files.length - 1}
+                      className="queue-btn"
+                      title="Move page down"
+                      aria-label="Move down"
+                    >
+                      <ArrowDown size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRotate(index)}
+                      className="queue-btn"
+                      title="Rotate 90°"
+                      aria-label="Rotate 90 degrees"
+                    >
+                      <RotateCw size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRemove(index)}
+                      className="queue-btn delete"
+                      title="Remove from queue"
+                      aria-label="Remove image"
+                    >
+                      <X size={13} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         ) : undefined
       }

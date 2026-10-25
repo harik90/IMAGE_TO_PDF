@@ -166,6 +166,12 @@ a {
   text-decoration: none;
 }
 
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
 button {
   font-family: inherit;
 }
@@ -1211,6 +1217,216 @@ footer.app-footer {
 
 .btn-secondary-compact:hover:not(:disabled) {
   border-color: var(--border-dotted-strong);
+}
+
+/* ==========================================================================
+   QUEUE & FILE PREVIEW SYSTEM (TACTILE DOTTED WELL)
+   ========================================================================== */
+
+.queue-box {
+  background: var(--surface-card);
+  border: 1.5px dotted var(--border-dotted);
+  border-radius: var(--radius-card);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-craft);
+  width: 100%;
+}
+
+.queue-box-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px dotted var(--border-dotted);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.queue-box-title-group {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.queue-box-title {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.queue-box-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 520px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 2px;
+}
+
+.queue-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--surface-well);
+  border: 1px dotted var(--border-dotted);
+  border-radius: var(--radius-well);
+  transition: all 140ms ease;
+  min-width: 0;
+}
+
+.queue-row:hover {
+  background: var(--surface-card-hover);
+  border-color: var(--border-dotted-strong);
+}
+
+.queue-row-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.queue-idx {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.queue-thumb-wrap {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  min-height: 52px;
+  max-width: 52px;
+  max-height: 52px;
+  border-radius: 8px;
+  border: 1px dotted var(--border-dotted);
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.queue-thumb {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 52px !important;
+  max-height: 52px !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: 6px;
+}
+
+.queue-meta {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.queue-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.queue-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.queue-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.queue-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--surface-card);
+  border: 1px dotted var(--border-dotted);
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 120ms ease;
+  padding: 0;
+}
+
+.queue-btn:hover:not(:disabled) {
+  background: var(--surface-well);
+  border-color: var(--border-dotted-strong);
+  color: var(--text-primary);
+}
+
+.queue-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.queue-btn.delete:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+}
+
+/* Tool info card */
+.tool-info-card {
+  background: var(--surface-card);
+  border: 1.5px dotted var(--border-dotted);
+  border-radius: var(--radius-card);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-craft);
+}
+
+.tool-info-heading {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.tool-info-body {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
 }
 
 /* ==========================================================================
