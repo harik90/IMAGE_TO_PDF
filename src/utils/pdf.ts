@@ -1,6 +1,5 @@
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Point to self-hosted worker in public/pdfjs/
 if (typeof window !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.mjs';
 }
@@ -10,14 +9,10 @@ export async function loadPdfDocument(file: File) {
   try {
     const loadingTask = pdfjsLib.getDocument({
       data: arrayBuffer,
-      cMapUrl: undefined,
       cMapPacked: true
     });
     return await loadingTask.promise;
   } catch (err: any) {
-    if (err?.name === 'PasswordException' || err?.message?.toLowerCase().includes('password')) {
-      throw new Error('This PDF is locked or damaged. Remove the password and try again.');
-    }
     throw new Error('This PDF is locked or damaged. Remove the password and try again.');
   }
 }
@@ -28,7 +23,6 @@ export async function extractTextFromPdfPage(pdfPage: any): Promise<string> {
 
   if (!items || items.length === 0) return '';
 
-  // Sort items primarily by Y descending (top to bottom), then X ascending (left to right)
   const lines: { y: number; text: string }[] = [];
   const lineThreshold = 5;
 
@@ -45,12 +39,22 @@ export async function extractTextFromPdfPage(pdfPage: any): Promise<string> {
     }
   }
 
-  // Sort top-to-bottom
   lines.sort((a, b) => b.y - a.y);
   return lines.map(l => l.text.trim()).join('\n');
 }
 
-export async function renderPdfPageToCanvas(pdfPage: any, scale = 2.0): Promise<HTMLCanvasElement> {
+export async function renderPdfPageToCanvas(pdfPage: any, dpi = 300): Promise<HTMLCanvasElement> {
+  // 300 DPI standard: 300 / 72 ≈ 4.1667
+  let scale = dpi / 72;
+  const initialViewport = pdfPage.getViewport({ scale });
+
+  // Cap maximum dimension to 4096px for mobile/browser memory protection
+  const maxDim = 4096;
+  if (initialViewport.width > maxDim || initialViewport.height > maxDim) {
+    const ratio = Math.min(maxDim / initialViewport.width, maxDim / initialViewport.height);
+    scale = scale * ratio;
+  }
+
   const viewport = pdfPage.getViewport({ scale });
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d');
@@ -59,7 +63,6 @@ export async function renderPdfPageToCanvas(pdfPage: any, scale = 2.0): Promise<
 
   if (!context) throw new Error('Could not get canvas 2D context');
 
-  // Fill with white background
   context.fillStyle = '#ffffff';
   context.fillRect(0, 0, canvas.width, canvas.height);
 
