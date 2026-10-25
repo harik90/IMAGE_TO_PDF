@@ -2,6 +2,7 @@
   "name": "image_to_pdf",
   "private": true,
   "version": "1.0.0",
+  "description": "quiet craft client-side image and pdf utilities without cloud uploads",
   "type": "module",
   "scripts": {
     "dev": "vite",
