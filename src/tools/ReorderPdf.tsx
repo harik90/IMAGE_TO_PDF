@@ -222,54 +222,72 @@ export const ReorderPdfTool: React.FC = () => {
       }
       fileSequenceContent={
         pagesOrder.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '14px' }}>
-            {pagesOrder.map((item, index) => (
-              <div
-                key={index}
-                style={{
-                  background: 'var(--surface-card)',
-                  border: '1px solid var(--border-dim)',
-                  borderRadius: 'var(--radius-well)',
-                  padding: '10px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-              >
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Page {index + 1}</div>
-                <img
-                  src={item.dataUrl}
-                  alt={`Page ${index + 1}`}
-                  style={{ width: '100%', height: '140px', objectFit: 'contain', background: '#fff', borderRadius: '4px' }}
-                />
-                <div style={{ display: 'flex', gap: '4px', width: '100%', justifyContent: 'center' }}>
-                  <button
-                    onClick={() => handleMove(index, 'up')}
-                    disabled={index === 0}
-                    className="btn-secondary"
-                    style={{ padding: '4px 6px', fontSize: '11px' }}
-                  >
-                    ←
-                  </button>
-                  <button
-                    onClick={() => handleMove(index, 'down')}
-                    disabled={index === pagesOrder.length - 1}
-                    className="btn-secondary"
-                    style={{ padding: '4px 6px', fontSize: '11px' }}
-                  >
-                    →
-                  </button>
-                  <button
-                    onClick={() => handleDeletePage(index)}
-                    className="btn-secondary"
-                    style={{ padding: '4px 6px', fontSize: '11px', color: '#ef4444' }}
-                  >
-                    ✕
-                  </button>
-                </div>
+          <div className="queue-box">
+            <div className="queue-box-header">
+              <div className="queue-box-title-group">
+                <span className="queue-box-title">Page Arrangement</span>
+                <span className="queue-box-count">({pagesOrder.length} pages in document)</span>
               </div>
-            ))}
+              <span className="accent-script-note">*(reorder with arrows or delete pages)*</span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '14px', marginTop: '6px' }}>
+              {pagesOrder.map((item, index) => (
+                <div
+                  key={index}
+                  style={{
+                    background: 'var(--surface-well)',
+                    border: '1.5px dotted var(--border-dotted)',
+                    borderRadius: 'var(--radius-well)',
+                    padding: '10px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>Page {index + 1}</div>
+                  <div style={{ width: '100%', height: '140px', background: '#FFFFFF', borderRadius: '6px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dotted var(--border-dotted)' }}>
+                    <img
+                      src={item.dataUrl}
+                      alt={`Page ${index + 1}`}
+                      style={{ maxWidth: '100%', maxHeight: '140px', objectFit: 'contain' }}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: '4px', width: '100%', justifyContent: 'center' }}>
+                    <button
+                      type="button"
+                      onClick={() => handleMove(index, 'up')}
+                      disabled={index === 0}
+                      className="queue-btn"
+                      style={{ width: '28px', height: '26px' }}
+                      title="Move left"
+                    >
+                      ←
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleMove(index, 'down')}
+                      disabled={index === pagesOrder.length - 1}
+                      className="queue-btn"
+                      style={{ width: '28px', height: '26px' }}
+                      title="Move right"
+                    >
+                      →
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeletePage(index)}
+                      className="queue-btn delete"
+                      style={{ width: '28px', height: '26px' }}
+                      title="Delete page"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : undefined
       }

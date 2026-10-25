@@ -78,6 +78,14 @@ export const ImageToBase64Tool: React.FC = () => {
             title={file ? file.name : 'Select image to encode'}
             subtitle={file ? formatBytes(file.size) : 'PNG · JPG · WEBP · SVG · GIF'}
           />
+
+          {previewUrl && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '6px' }}>
+              <div style={{ maxHeight: '160px', borderRadius: '8px', overflow: 'hidden', border: '1px dotted var(--border-dotted)', display: 'flex', justifyContent: 'center', background: 'var(--surface-well)' }}>
+                <img src={previewUrl} alt="Preview" style={{ maxHeight: '160px', objectFit: 'contain' }} />
+              </div>
+            </div>
+          )}
         </>
       }
       indigoCardContent={

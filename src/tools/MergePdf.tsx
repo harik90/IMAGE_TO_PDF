@@ -4,6 +4,7 @@ import { ToolLayout } from '../components/ToolLayout';
 import { Dropzone } from '../components/Dropzone';
 import { formatBytes, validateFileSize, validateFileType, downloadBlob } from '../utils/file';
 import { QueuedFile } from '../types';
+import { ArrowUp, ArrowDown, X, FileText } from 'lucide-react';
 
 export const MergePdfTool: React.FC = () => {
   const [files, setFiles] = useState<QueuedFile[]>([]);
@@ -256,55 +257,68 @@ export const MergePdfTool: React.FC = () => {
       fileSequenceContent={
         files.length > 0 ? (
           <div className="queue-box">
-            <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-              Document Sequence ({files.length} files)
+            <div className="queue-box-header">
+              <div className="queue-box-title-group">
+                <span className="queue-box-title">Document Sequence</span>
+                <span className="queue-box-count">({files.length} PDFs to combine)</span>
+              </div>
+              <span className="accent-script-note">*(merge order: top to bottom)*</span>
             </div>
-            {files.map((item, index) => (
-              <div key={item.id} className="queue-row">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)', width: '24px' }}>
-                    {String(index + 1).padStart(2, '0')}.
-                  </span>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {item.name}
+
+            <div className="queue-list">
+              {files.map((item, index) => (
+                <div key={item.id} className="queue-row">
+                  <div className="queue-row-left">
+                    <span className="queue-idx">
+                      {String(index + 1).padStart(2, '0')}.
+                    </span>
+                    <div className="queue-thumb-wrap" style={{ background: 'var(--surface-well)' }}>
+                      <FileText size={20} style={{ color: 'var(--accent-mint)' }} />
                     </div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                      ↳ {formatBytes(item.size)}
+                    <div className="queue-meta">
+                      <div className="queue-name" title={item.name}>
+                        {item.name}
+                      </div>
+                      <div className="queue-sub">
+                        <span>{formatBytes(item.size)}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                  <button
-                    onClick={() => handleMove(index, 'up')}
-                    disabled={index === 0}
-                    className="btn-secondary"
-                    style={{ padding: '6px 8px' }}
-                    title="Move up"
-                  >
-                    ↑
-                  </button>
-                  <button
-                    onClick={() => handleMove(index, 'down')}
-                    disabled={index === files.length - 1}
-                    className="btn-secondary"
-                    style={{ padding: '6px 8px' }}
-                    title="Move down"
-                  >
-                    ↓
-                  </button>
-                  <button
-                    onClick={() => handleRemove(index)}
-                    className="btn-secondary"
-                    style={{ padding: '6px 8px', color: '#ef4444' }}
-                    title="Remove"
-                  >
-                    ✕
-                  </button>
+                  <div className="queue-actions">
+                    <button
+                      type="button"
+                      onClick={() => handleMove(index, 'up')}
+                      disabled={index === 0}
+                      className="queue-btn"
+                      title="Move up"
+                      aria-label="Move up"
+                    >
+                      <ArrowUp size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleMove(index, 'down')}
+                      disabled={index === files.length - 1}
+                      className="queue-btn"
+                      title="Move down"
+                      aria-label="Move down"
+                    >
+                      <ArrowDown size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRemove(index)}
+                      className="queue-btn delete"
+                      title="Remove from queue"
+                      aria-label="Remove"
+                    >
+                      <X size={13} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         ) : undefined
       }

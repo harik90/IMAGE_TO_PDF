@@ -7,6 +7,7 @@ export const ResizeImageTool: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [origWidth, setOrigWidth] = useState<number>(0);
   const [origHeight, setOrigHeight] = useState<number>(0);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [width, setWidth] = useState<number>(800);
   const [height, setHeight] = useState<number>(600);
   const [keepAspect, setKeepAspect] = useState<boolean>(true);
@@ -46,9 +47,9 @@ export const ResizeImageTool: React.FC = () => {
       setWidth(img.naturalWidth);
       setHeight(img.naturalHeight);
       setFile(chosen);
+      setPreviewUrl(url);
       setOutputFileName(chosen.name.replace(/\.[^/.]+$/, '') + '-resized.png');
       setStatus(`Loaded "${chosen.name}" (${img.naturalWidth} × ${img.naturalHeight} px)`);
-      URL.revokeObjectURL(url);
     };
     img.src = url;
   };
@@ -142,6 +143,14 @@ export const ResizeImageTool: React.FC = () => {
             title={file ? file.name : 'Select image to resize'}
             subtitle={file ? `${origWidth} × ${origHeight} px · ${formatBytes(file.size)}` : 'Single image up to 50MB'}
           />
+
+          {previewUrl && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '6px' }}>
+              <div style={{ maxHeight: '160px', borderRadius: '8px', overflow: 'hidden', border: '1px dotted var(--border-dotted)', display: 'flex', justifyContent: 'center', background: 'var(--surface-well)' }}>
+                <img src={previewUrl} alt="Preview" style={{ maxHeight: '160px', objectFit: 'contain' }} />
+              </div>
+            </div>
+          )}
         </>
       }
       indigoCardContent={
