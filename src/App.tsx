@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { CommandPalette } from './components/CommandPalette';
+import { MobilePillNav } from './components/MobilePillNav';
 import { HomePage } from './pages/Home';
 import { toolsRegistry } from './tools/registry';
 
@@ -79,6 +80,7 @@ export const App: React.FC = () => {
       </main>
 
       <Footer />
+      <MobilePillNav onOpenSearch={() => setIsSearchOpen(true)} />
       <CommandPalette isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </BrowserRouter>
   );
