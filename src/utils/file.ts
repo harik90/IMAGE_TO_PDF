@@ -69,11 +69,22 @@ export function validateFileType(file: File, acceptedMimes: string[], acceptedEx
   return { valid: true };
 }
 
+export function sanitizeFilename(name: string, fallback = 'document'): string {
+  if (!name) return fallback;
+  const cleaned = name
+    .replace(/[\0\r\n\t]/g, '')
+    .replace(/[/\\]+/g, '_')
+    .replace(/^\.+/, '')
+    .trim();
+  return cleaned || fallback;
+}
+
 export function downloadBlob(blob: Blob, filename: string): void {
+  const safeName = sanitizeFilename(filename);
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = filename;
+  a.download = safeName;
   document.body.appendChild(a);
   a.click();
   setTimeout(() => {
@@ -83,7 +94,13 @@ export function downloadBlob(blob: Blob, filename: string): void {
 }
 
 export async function downloadZip(files: { [filename: string]: Uint8Array }, zipName: string): Promise<void> {
-  const zipped = zipSync(files);
+  const sanitizedFiles: { [filename: string]: Uint8Array } = {};
+  for (const [key, val] of Object.entries(files)) {
+    const safeKey = sanitizeFilename(key, 'file');
+    sanitizedFiles[safeKey] = val;
+  }
+  const safeZipName = sanitizeFilename(zipName, 'archive.zip');
+  const zipped = zipSync(sanitizedFiles);
   const blob = new Blob([zipped as any], { type: 'application/zip' });
-  downloadBlob(blob, zipName);
+  downloadBlob(blob, safeZipName);
 }

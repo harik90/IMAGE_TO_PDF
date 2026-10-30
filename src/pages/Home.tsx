@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { toolsRegistry } from '../tools/registry';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import { getPublicAssetUrl } from '../utils/file';
 
 interface Props {
   onOpenSearch?: () => void;
@@ -19,7 +20,16 @@ export const HomePage: React.FC<Props> = () => {
       {/* Slot 1: Quiet Hero Intro */}
       <section className="quiet-hero">
         <div className="section-title-row">
-          <span className="section-title-bold">local file studio</span>
+          <div className="hero-badge-wrap">
+            <img
+              src={getPublicAssetUrl('icon.png')}
+              alt="image_to_pdf mascot"
+              className="hero-mascot-avatar"
+              width="24"
+              height="24"
+            />
+            <span className="section-title-bold">local file studio</span>
+          </div>
           <span className="accent-script-note">*(quiet &amp; in-memory)*</span>
         </div>
 

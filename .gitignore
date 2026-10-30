@@ -2,11 +2,16 @@
 node_modules/
 dist/
 
-# Ignore personal document files
+# Ignore personal test and document files
 *.jpg
 *.jpeg
 *.png
 *.pdf
 *.webp
+
+# Whitelist public app assets & preview
+!public/*.png
+!public/*.ico
+!public/*.webp
 !preview.png
 IMAGE_TO_PDF/

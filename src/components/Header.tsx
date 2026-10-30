@@ -4,6 +4,7 @@ import { toolsRegistry } from '../tools/registry';
 import { Search } from 'lucide-react';
 import { GitHubStarButton } from './GitHubStarButton';
 import { ThemeToggle } from './ThemeToggle';
+import { getPublicAssetUrl } from '../utils/file';
 
 interface Props {
   onOpenSearch: () => void;
@@ -18,6 +19,13 @@ export const Header: React.FC<Props> = ({ onOpenSearch }) => {
       <div className="header-inner">
         {/* Left: Breadcrumb path in technical mono */}
         <Link to="/" className="header-brand-mono" aria-label="image_to_pdf home">
+          <img
+            src={getPublicAssetUrl('favicon-32x32.png')}
+            alt=""
+            className="brand-mascot-icon"
+            width="20"
+            height="20"
+          />
           <span className="mono-path-tilde">~/</span>
           <span className="mono-path-root">image_to_pdf</span>
           {currentTool && (

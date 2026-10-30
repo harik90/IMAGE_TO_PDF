@@ -25,7 +25,7 @@ function parseCountValue(raw: unknown): number | null {
 export function useGitHubStars(config?: GitHubStarConfig) {
   const owner = config?.owner || 'harik90';
   const repo = config?.repo || 'IMAGE_TO_PDF';
-  const pollInterval = config?.pollIntervalMs || 15000; // 15 seconds real-time poll
+  const pollInterval = config?.pollIntervalMs || 60000; // 60s periodic poll to respect GitHub rate limits
   const cacheKey = `gh_stars_${repo}`;
 
   const [stars, setStars] = useState<number | null>(() => {
